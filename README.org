@@ -20,11 +20,11 @@ Welcome to Rincanter!
 
 ** Install and launch Rserve
     From R execute following lines:
-    ```
+    #+BEGIN_EXAMPLE R
     install.packages("Rserve")
     library(Rserve)
     Rserve()
-    ```
+    #+END_EXAMPLE
  
 * Example Usage
   The main entry points are the functions:
