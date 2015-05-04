@@ -1,4 +1,4 @@
-(defproject com.evocomputing/rincanter
+(defproject svarcheg/rincanter
             "0.0.1-SNAPSHOT"
             :description "Clojure/R integration using rosuda Rserve"
             :dependencies [[org.clojure/clojure "1.6.0"]
