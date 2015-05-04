@@ -28,10 +28,10 @@ Welcome to Rincanter!
  
 * Example Usage
   The main entry points are the functions:
-  - [[https://github.com/svarcheg/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/r-eval][r-eval]]
-  - [[https://github.com/svarcheg/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/with-r-eval][with-r-eval]]
-  - [[https://github.com/svarcheg/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/r-set!][r-set!]]
-  - [[https://github.com/svarcheg/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/r-get][r-get]]
+  - [[http://svarcheg.github.io/rincanter/com.evocomputing.rincanter.html#var-r-eval][r-eval]]
+  - [[http://svarcheg.github.io/rincanter/com.evocomputing.rincanter.html#var-with-r-eval][with-r-eval]]
+  - [[http://svarcheg.github.io/rincanter/com.evocomputing.rincanter.html#var-r-set.21][r-set!]]
+  - [[http://svarcheg.github.io/rincanter/com.evocomputing.rincanter.html#var-r-get][r-get]]
 
 ** r-eval
 You can play around with Clojure/Incanter and R in the same REPL session:
@@ -99,4 +99,4 @@ are evaluated in R using r-eval:
 ** API Documentation
 
    API Documentation for rincanter is located at:
-   [[https://github.com/svarcheg/rincanter][Rincanter API]]
+   [[http://svarcheg.github.io/rincanter/][Rincanter API]]
