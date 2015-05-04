@@ -1,6 +1,6 @@
 (defproject com.evocomputing/rincanter
-            "1.0.0-SNAPSHOT"
-            :description "Clojure/R integration using rosuda JRIEngine"
+            "0.0.1-SNAPSHOT"
+            :description "Clojure/R integration using rosuda Rserve"
             :dependencies [[org.clojure/clojure "1.6.0"]
                            [incanter "1.5.6"]
                            [org.clojure/tools.logging "0.3.1"]
@@ -13,4 +13,8 @@
                       :copyright   "Eclipse Public License (EPL)"
                       :web-src-dir "http://github.com/jolby/rincanter/blob/"
                       :web-home    "http://jolby.github.com/rincanter/"}
-            :plugins [[lein-kibit "0.1.2"] [lein-ancient "0.6.7"] [lein-bikeshed "0.2.0"] [lein-cloverage "1.0.3"]])
+            :plugins [[lein-kibit "0.1.2"]
+                      [lein-ancient "0.6.7"]
+                      [lein-bikeshed "0.2.0"]
+                      [lein-cloverage "1.0.3"]
+                      [codox "0.8.12"]])
