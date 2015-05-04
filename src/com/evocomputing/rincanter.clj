@@ -1,3 +1,4 @@
+;; Original work
 ;; by Joel Boehland http://github.com/jolby/rincanter
 ;; January 24, 2010
 
@@ -9,67 +10,59 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
+;; Modified work by svarcheg https://github.com/svarcheg/rincanter
+;; May 5, 2015
 
-(ns
-    com.evocomputing.rincanter
-  (:import (org.rosuda.REngine REXP RList REXPGenericVector
-                               REXPInteger REXPDouble REXPString REXPLogical
-                               RFactor REXPFactor
-                               REngineException REXPMismatchException)
-           (org.rosuda.REngine.JRI JRIEngine)
-           (org.rosuda.JRI RMainLoopCallbacks))
-  (:use [incanter.core]
-        [com.evocomputing.rincanter.convert]))
+(ns com.evocomputing.rincanter
+  (:import (org.rosuda.REngine REXP REngineException REXPMismatchException)
+           (org.rosuda.REngine.Rserve RConnection))
+  (:require [com.evocomputing.rincanter.convert :refer :all]))
 
-(defonce ^:dynamic *jri-engine* (ref nil))
+(defonce ^:dynamic *r-connection* (ref nil))
 
-(defn init-jri-engine
+(defn connect-to-rserve
   "Initialize the jri engine. This can only be done once in the
-lifetime of the jvm-- not our rules- that's how the embedded R engine
-seems to want things."
-  ([] (init-jri-engine nil))
-  ([handler]
-     ;;check for pre-existing jri-engine
-     (when @*jri-engine*
-       (throw (IllegalStateException.
-               "JRIEngine can only be initialized once per lifetime of the VM.")))
-     ;;Tell Rengine to not die if it can't load the JRI native lib
-     ;;This allows us to catch and deal with this situation ourselves
-     (System/setProperty "jri.ignore.ule" "yes")
-     (dosync
-      (ref-set *jri-engine*
-               {:jri (JRIEngine. (into-array ["--vanilla" "--quiet"]) handler)}))))
+  lifetime of the jvm-- not our rules- that's how the embedded R engine
+  seems to want things."
+  []
+  ;;check for pre-existing jri-engine
+  (when @*r-connection*
+    (throw (IllegalStateException.
+             "JRIEngine can only be initialized once per lifetime of the VM.")))
+  (dosync
+    (ref-set *r-connection*
+             {:jri (RConnection.)})))
 
-(defn get-jri-engine
+(defn get-r-connection
   "Get the jri-engine. If it doesn't exist, create it using the
   default init-jri-engine function and return it."
   []
-  (if @*jri-engine*
-    (@*jri-engine* :jri)
-    (do (init-jri-engine)
-        (if @*jri-engine*
-          (@*jri-engine* :jri)
+  (if @*r-connection*
+    (@*r-connection* :jri)
+    (do (connect-to-rserve)
+        (if @*r-connection*
+          (@*r-connection* :jri)
           (throw (IllegalStateException.
-                  "Unable to initialize JRIEngine"))))))
+                   "Unable to initialize JRIEngine"))))))
 
 (defn r-eval-no-catch
   "Eval expression in the R engine. Will not catch any exceptions that
   happen during evaluation"
   [expression]
-  (let [r (get-jri-engine)]
+  (let [r (get-r-connection)]
     (.parseAndEval r expression)))
 
 (defn r-eval-raw
   "Eval expression in the R engine. Just return the raw JRI/R wrapper,
   don't convert to Clojure object"
   [expression]
-  (let [r (get-jri-engine)]
+  (let [r (get-r-connection)]
     (try
-     (.parseAndEval r expression)
-     (catch REngineException ex
-       (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))
-     (catch REXPMismatchException ex
-       (println (format "Caught exception evaluating expression: %s\n: %s" expression ex))))))
+      (.parseAndEval r expression)
+      (catch REngineException ex
+        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))
+      (catch REXPMismatchException ex
+        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex))))))
 
 (defn r-eval
   "Eval expression in the R engine. Convert the return value from
@@ -79,22 +72,22 @@ seems to want things."
 
 (defn r-try-parse-eval
   "Eval expression in the R engine, wrapped (on the R side) in
-try/catch. Will catch errors on the R side and convert to Exception
-and throw"
+  try/catch. Will catch errors on the R side and convert to Exception
+  and throw"
   [expression]
-  (let [r (get-jri-engine)]
+  (let [r (get-r-connection)]
     (try
-     (.assign r ".tmp." expression)
-     (let [rexp (.parseAndEval r "try(eval(parse(text=.tmp.)),silent=TRUE)")]
-       (if (.inherits rexp "try-error")
-         (throw (Exception.
-                 (format "Error in R evaluating expression:\n %s.\nR exception: %s"
-                         expression (.asString rexp))))
-         rexp))
-     (catch REngineException ex
-       (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))
-     (catch REXPMismatchException ex
-       (println (format "Caught exception evaluating expression: %s\n: %s" expression ex))))))
+      (.assign r ".tmp." expression)
+      (let [rexp (.parseAndEval r "try(eval(parse(text=.tmp.)),silent=TRUE)")]
+        (if (.inherits rexp "try-error")
+          (throw (Exception.
+                   (format "Error in R evaluating expression:\n %s.\nR exception: %s"
+                           expression (.asString rexp))))
+          rexp))
+      (catch REngineException ex
+        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))
+      (catch REXPMismatchException ex
+        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex))))))
 
 (defmacro with-r-eval-no-catch
   "Evaluate forms that are string using r-eval-no-catch, otherwise, just eval
@@ -121,13 +114,13 @@ clojure code normally"
   `(do ~@(map #(if (string? %) (list 'r-try-parse-eval %) %) forms)))
 
 (defn r-set!
- "Assign r-name to val within the R engine"
- [r-name val]
-  (let [r (get-jri-engine)]
+  "Assign r-name to value within the R engine"
+  [r-name value]
+  (let [r (get-r-connection)]
     (try
-     (.assign r r-name val)
-     (catch REngineException ex
-       (println (format "Caught exception assigning R val: %s\n: %s" r-name ex))))))
+      (.assign r r-name value)
+      (catch REngineException ex
+        (println (format "Caught exception assigning R value: %s\n: %s" r-name ex))))))
 
 (defn r-get-raw
   "Retrieve the value with this name in the R engine. Do not convert
@@ -145,7 +138,7 @@ clojure code normally"
   println on returned Strings"
   [obj]
   (if (string? obj)
-    (dorun (map #'println  (r-eval (format "capture.output(str(%s))" obj))))
+    (dorun (map #'println (r-eval (format "capture.output(str(%s))" obj))))
     (do
       (r-set! ".printtmp." (if (instance? REXP obj) obj (to-r obj)))
       (dorun (map #'println (r-eval "capture.output(str(.printtmp.))"))))))
@@ -154,16 +147,16 @@ clojure code normally"
   "Tries to install the provided package using the optionally provided
 repository or the master CRAN repository"
   ([package]
-     (dorun (map #'println
-                 (r-eval (format "capture.output(install.packages(\"%s\", repos=\"http://cran.r-project.org\"))" package)))))
+   (dorun (map #'println
+               (r-eval (format "capture.output(install.packages(\"%s\", repos=\"http://cran.r-project.org\"))" package)))))
   ([package repo]
-     (dorun (map #'println
-                 (r-eval (format "capture.output(install.packages(\"%s\", repos=\"%s\"))" package repo))))))
+   (dorun (map #'println
+               (r-eval (format "capture.output(install.packages(\"%s\", repos=\"%s\"))" package repo))))))
 
 ;;
 ;;Inspection, typechecking and print methods
 ;;===========================================================================
 ;;
-(defmethod print-method org.rosuda.REngine.REXP [o w]
-  (.write w (str "#=(org.rosuda.REngine.REXP. " (.toString o) ")")))
+(defmethod print-method REXP [o w]
+  (.write w (str "#=(org.rosuda.REngine.REXP. " (str o) ")")))
 

@@ -1,3 +1,4 @@
+;; Original work
 ;; by Joel Boehland http://github.com/jolby/rincanter
 ;; January 24, 2010
 
@@ -9,14 +10,12 @@
 ;; agreeing to be bound by the terms of this license.  You must not
 ;; remove this notice, or any other, from this software.
 
+;; Modified work by svarcheg https://github.com/svarcheg/rincanter
+;; May 5, 2015
 
 (ns com.evocomputing.test.rincanter
-  (:import (org.rosuda.REngine REXP RList REXPGenericVector
-                               REXPInteger REXPDouble REXPString REXPLogical
-                               RFactor REXPFactor
-                               REngineException REXPMismatchException)
-           (org.rosuda.REngine.JRI JRIEngine)
-           (org.rosuda.JRI RMainLoopCallbacks))
+  (:import (org.rosuda.REngine REXPInteger REXPDouble REXPString REXPLogical)
+           (org.rosuda.REngine.Rserve RConnection))
   (:use (clojure test))
   (:use (incanter core stats))
   (:use (com.evocomputing.rincanter convert))
@@ -27,12 +26,12 @@
   (>= delta (abs (- x y))))
 
 (defn jri-engine-fixture [test-fn]
-  (get-jri-engine)
+  (get-r-connection)
   (test-fn)
-  (.close (get-jri-engine)))
+  (.close ^RConnection  (get-r-connection)))
 
 (deftest can-connect-to-R
-  (is (not (= nil (get-jri-engine)))))
+  (is (not (= nil (get-r-connection)))))
 
 (deftest to-r-conversions
   (is (= REXPLogical (class (to-r (into-array Byte/TYPE (map #'byte [1 2 3]))))))

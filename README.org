@@ -4,21 +4,13 @@ Welcome to Rincanter!
 
 * About
 
-  Rincanter is a [[http://clojure.org/][Clojure]] and [[http://data-sorcery.org/][Incanter]] wrapper around the 
-  Rosuda [[http://www.rforge.net/rJava/][JRIEngine Java/R bridge]].
-  The hope is to allow easy access to an embedded R
-  engine from Incanter. It also offers translation between
+  Main difference from original [[https://github.com/jolby/rincanter/][rincanter]] is that this version
+  does not require playing with native libraries as it uses a socket connection to the R interpreter.
+  As the original version, it also offers translation between
   [[http://clojure.org/][Clojure]] and [[http://data-sorcery.org/][Incanter]] datatypes and R datatypes such as R dataframe to
   [[http://data-sorcery.org/][Incanter]] dataset.
 
 * Installation
-  
-** Install Leiningen
-   Rincanter uses [[http://github.com/technomancy/leiningen][Leiningen]] (currently using version 2) to manage its dependencies on Clojure,
-   Incanter, and Rosuda JRI components. You will need to install
-   [[http://github.com/technomancy/leiningen][Leiningen]] following the instructions on its
-   [[http://github.com/technomancy/leiningen][project page]].
-  
 
 ** Install R for your platform
 
@@ -26,138 +18,20 @@ Welcome to Rincanter!
    document, but R is well supported on most platforms, and has great
    documentation: [[http://cran.r-project.org/][R Project Page]]
 
-   
-** make sure r_HOME is set.
-   On some platforms or installations, you may also need to set the
-   environment variable R_HOME. The value you use for R_HOME will
-   depend on your particular installation, but following are typical
-   values for setting R_HOME in the shell and in emacs for Mac OS X:
-
-   shell:
-#+BEGIN_EXAMPLE 
-  R_HOME=/Library/Frameworks/R.framework/Resources; export R_HOME
-#+END_EXAMPLE
-
-  You can also set this in one of your .profile files to ensure that
-  it is always set in your shell. 
-
-  For emacs, in your scratch buffer, enter the elisp form:
-#+BEGIN_EXAMPLE 
-  (setenv "R_HOME" "/Library/Frameworks/R.framework/Resources")
-#+END_EXAMPLE
-
-  Then, go to the end of that line and execute the key-command:
-
-#+BEGIN_EXAMPLE 
-  C-x C-e
-#+END_EXAMPLE
-
-  ..to execute the elisp form in your running emacs. You can also put
-  that form in one of your emacs startup files if you want R_HOME to
-  always be set.
-
-
-
-
-** Install Rincanter from git
-
-#+BEGIN_EXAMPLE
-   git clone git://github.com/jolby/rincanter.git
-   cd rincanter
-#+END_EXAMPLE
-
-
-** Download and Install the rosuda JRI and REngine components
-This is a bit archaic.  Rosuda seems to compile against the version of R installed on 
-your system so we can't distribute the JARs.  You need to build two JARs, and one native
-lib and make them available to RIncanter.
-
-
-*** The Native Library
-Staring in the rincater base directory
-
-#+BEGIN_EXAMPLE 
-   mkdir external
-   cd external 
-   svn co svn://svn.rforge.net/org/trunk/rosuda/REngine
-   svn co svn://svn.rforge.net/org/trunk/rosuda/JRI
-   cd JRI
-   ./configure
-   make
-#+END_EXAMPLE
-
-   You will now have a jri native library file in this directory. Depending on
-   your platform it will have a name like: 
-
-   - libjri.so (linux)
-   - libjri.jnilib (Mac OS X) 
-   - jri.dll (Windows)
-
-   You need to make this native lib available to RIncanter which is done
-by putting in the appropriate directory.  For instance on a 32 bit linux:
-
-#+BEGIN_EXAMPLE 
-  mkdir ../../target/
-  mkdir ../../target/native/
-  mkdir ../../target/native/linux/
-  mkdir ../../target/native/linux/x86/
-  cp libjri.so  ../../target/native/linux/x86/
-#+END_EXAMPLE
-
-The appropriate directory pattern is ../../target/native/<os>/<arch>/
-where <os> is probably one of win,macosx,linux and <arch> is x86 or x86_64 if
-you are on 64bit.
-
-*** Install the JARs
-#+BEGIN_EXAMPLE 
-  cd ../REngine
-  make
-#+END_EXAMPLE
-
-  You will now have an REngine.jar file in this directory.
-
-#+BEGIN_EXAMPLE 
-  cd JRI # this is a child dir of REngine, different from the JRI dir above
-  make
-#+END_EXAMPLE
-
-  You will now have an JRIEngine.jar file in this directory.
-
-  Now you need to make these JARs available to leiningen, either by installing them into the local repository
-or nexus.  If you have maven handy you can install them to your local repo with 
-these commands
-
-#+BEGIN_EXAMPLE 
-mvn install:install-file -Dfile=./JRIEngine.jar -DartifactId=JRIEngine -Dversion=0.5-5 -DgroupId=JRIEngine -Dpackaging=jar
-cd ..
-mvn install:install-file -Dfile=./REngine.jar -DartifactId=REngine -Dversion=0.5-5 -DgroupId=REngine -Dpackaging=jar
-#+END_EXAMPLE
-
-Or follow https://github.com/technomancy/leiningen/blob/preview/doc/DEPLOY.md for more
-general instructions.
-
-
-** Test and Run
-   Now you are ready to test and run Rincanter.  Test
-
-#+BEGIN_EXAMPLE 
-lein test
-#+END_EXAMPLE
-
-To get an interactive session going by starting up emacs (making sure that R_HOME is visible) and then using nrepl
-
-#+BEGIN_EXAMPLE 
-emacs project.clj
-#+END_EXAMPLE
-
-and then M-x nrepl-jack-in.
+** Install and launch Rserve
+    From R execute following lines:
+    ```
+    install.packages("Rserve")
+    library(Rserve)
+    Rserve()
+    ```
  
 * Example Usage
   The main entry points are the functions:
-  - [[http://jolby.github.com/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/r-eval][r-eval]]
-  - [[http://jolby.github.com/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/with-r-eval][with-r-eval]]
-  - [[http://jolby.github.com/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/r-set!][r-set!]]
-  - [[http://jolby.github.com/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/r-get][r-get]]
+  - [[https://github.com/svarcheg/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/r-eval][r-eval]]
+  - [[https://github.com/svarcheg/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/with-r-eval][with-r-eval]]
+  - [[https://github.com/svarcheg/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/r-set!][r-set!]]
+  - [[https://github.com/svarcheg/rincanter/com.evocomputing.rincanter-api.html#com.evocomputing.rincanter/r-get][r-get]]
 
 ** r-eval
 You can play around with Clojure/Incanter and R in the same REPL session:
@@ -225,4 +99,4 @@ are evaluated in R using r-eval:
 ** API Documentation
 
    API Documentation for rincanter is located at:
-   [[http://jolby.github.com/rincanter][Rincanter API]]
+   [[https://github.com/svarcheg/rincanter][Rincanter API]]

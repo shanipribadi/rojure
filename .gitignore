@@ -9,3 +9,8 @@ lib
 classes
 autodoc
 native
+.idea
+target
+#*
+.lein-failures
+*.iml
