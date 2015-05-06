@@ -17,7 +17,7 @@
   (:import (org.rosuda.REngine REXPNull REXP RList REXPList REXPGenericVector
                                REXPInteger REXPDouble REXPString REXPLogical
                                RFactor REXPFactor))
-  (:require [incanter.core :refer [with-data col-names $ dataset categorical-var]]
+  (:require [incanter.core :refer [with-data col-names $ dataset categorical-var dataset?]]
             [clojure.core.incubator :refer [seqable?]]))
 
 (declare from-r)
@@ -180,6 +180,7 @@ otherwise"
     (nil? obj) ::nil
     (.isInstance REXP obj) ::rexp
     (and (meta obj) (:r-type (meta obj))) (:r-type (meta obj))
+    (dataset? obj) ::dataframe
     (array-of? Byte/TYPE obj) ::byte-array
     (array-of? Integer/TYPE obj) ::int-array
     (array-of? Long/TYPE obj) ::long-array

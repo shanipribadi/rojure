@@ -46,7 +46,8 @@
   (is (= REXPString (class (to-r (with-meta ["fee" "fie" "foe"] {:r-type REXPString})))))
   ;;seq conversions
   (is (= REXPInteger (class (to-r [1 2 3]))))
-  (is (= REXPDouble (class (to-r [1.9 2.0 3.9])))))
+  (is (= REXPDouble (class (to-r [1.9 2.0 3.9]))))
+  (is (= (dataset ["c1" "c2"] '((1 2) (3 4))) (from-r (to-r (dataset ["c1" "c2"] '((1 2) (3 4))))))))
 
 (deftest pass-through-int-vector
   (r-set! "iv1" (to-r [1 2 3]))
