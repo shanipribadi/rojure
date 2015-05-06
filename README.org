@@ -25,7 +25,13 @@ Welcome to Rincanter!
     library(Rserve)
     Rserve()
     #+END_EXAMPLE
- 
+
+** Add rincanter dependency to project.clj
+#+BEGIN_EXAMPLE clojure
+[svarcheg/rincanter "0.0.1-SNAPSHOT"]
+#+END_EXAMPLE
+
+
 * Example Usage
   The main entry points are the functions:
   - [[http://svarcheg.github.io/rincanter/com.evocomputing.rincanter.html#var-r-eval][r-eval]]
