@@ -13,7 +13,7 @@
 ;; Modified work by svarcheg https://github.com/svarcheg/rincanter
 ;; May 5, 2015
 
-(ns com.evocomputing.rincanter.convert
+(ns rincanter.convert
   (:import (org.rosuda.REngine REXPNull REXP RList REXPList REXPGenericVector
                                REXPInteger REXPDouble REXPString REXPLogical
                                RFactor REXPFactor))

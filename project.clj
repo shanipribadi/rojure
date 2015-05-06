@@ -11,8 +11,7 @@
                       :description "Clojure/R integration using rosuda JRIEngine"
                       :page-title  "Rincanter API documentation"
                       :copyright   "Eclipse Public License (EPL)"
-                      :web-src-dir "http://github.com/jolby/rincanter/blob/"
-                      :web-home    "http://jolby.github.com/rincanter/"}
+                      :web-home    "https://github.com/svarcheg/rincanter"}
             :plugins [[lein-kibit "0.1.2"]
                       [lein-ancient "0.6.7"]
                       [lein-bikeshed "0.2.0"]

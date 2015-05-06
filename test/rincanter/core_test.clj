@@ -13,13 +13,13 @@
 ;; Modified work by svarcheg https://github.com/svarcheg/rincanter
 ;; May 5, 2015
 
-(ns com.evocomputing.test.rincanter
+(ns rincanter.core-test
   (:import (org.rosuda.REngine REXPInteger REXPDouble REXPString REXPLogical)
            (org.rosuda.REngine.Rserve RConnection))
   (:use (clojure test))
   (:use (incanter core stats))
-  (:use (com.evocomputing.rincanter convert))
-  (:use (com.evocomputing rincanter)))
+  (:use (rincanter convert))
+  (:use (rincanter core)))
 
 ;;taken from incanter information_theory_tests.clj
 (defn =within [delta x y]

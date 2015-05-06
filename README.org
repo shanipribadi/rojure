@@ -34,15 +34,15 @@ Welcome to Rincanter!
 
 * Example Usage
   The main entry points are the functions:
-  - [[http://svarcheg.github.io/rincanter/com.evocomputing.rincanter.html#var-r-eval][r-eval]]
-  - [[http://svarcheg.github.io/rincanter/com.evocomputing.rincanter.html#var-with-r-eval][with-r-eval]]
-  - [[http://svarcheg.github.io/rincanter/com.evocomputing.rincanter.html#var-r-set.21][r-set!]]
-  - [[http://svarcheg.github.io/rincanter/com.evocomputing.rincanter.html#var-r-get][r-get]]
+  - [[http://svarcheg.github.io/rincanter/rincanter.core.html#var-r-eval][r-eval]]
+  - [[http://svarcheg.github.io/rincanter/rincanter.core.html#var-with-r-eval][with-r-eval]]
+  - [[http://svarcheg.github.io/rincanter/rincanter.core.html#var-r-set.21][r-set!]]
+  - [[http://svarcheg.github.io/rincanter/rincanter.core.rincanter.html#var-r-get][r-get]]
 
 ** r-eval
 You can play around with Clojure/Incanter and R in the same REPL session:
 #+BEGIN_EXAMPLE clojure
-   (use '(com.evocomputing rincanter))
+   (use '(rincanter core))
 
    (r-eval "data(iris)")
 
@@ -59,7 +59,7 @@ You can play around with Clojure/Incanter and R in the same REPL session:
 
 plotting:
 #+BEGIN_EXAMPLE
-   (use '(com.evocomputing rincanter))
+   (use '(rincanter core))
 
    (r-eval "data(iris)")
    
@@ -84,7 +84,7 @@ are evaluated in R using r-eval:
 
 
 #+BEGIN_EXAMPLE clojure
-   (use '(com.evocomputing rincanter))
+   (use '(rincanter core))
 
    (with-r-eval 
      "data(iris)"

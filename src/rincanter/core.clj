@@ -13,10 +13,10 @@
 ;; Modified work by svarcheg https://github.com/svarcheg/rincanter
 ;; May 5, 2015
 
-(ns com.evocomputing.rincanter
+(ns rincanter.core
   (:import (org.rosuda.REngine REXP REngineException REXPMismatchException)
            (org.rosuda.REngine.Rserve RConnection))
-  (:require [com.evocomputing.rincanter.convert :refer :all]))
+  (:require [rincanter.convert :refer [to-r from-r]]))
 
 (defonce ^:dynamic *r-connection* (ref nil))
 
