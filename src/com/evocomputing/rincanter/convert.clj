@@ -162,24 +162,31 @@ otherwise"
   {Byte    Byte/TYPE
    Integer Integer/TYPE
    Float   Float/TYPE
-   Double  Double/TYPE})
+   Double  Double/TYPE
+   Long    Long/TYPE})
 
 (defn prefer-primitive-type
   "If possible, ensure array is one of the primitive types. Convert if neccessary"
   [clazz]
   (or (*object-type-to-primitive-type-map* clazz) clazz))
 
+(defn array-of? [type obj]
+  (let [clz ^Class (class obj)]
+    (and (.isArray clz) (= type (.getComponentType clz)))))
+
 (defn to-r-dispatch
   [obj]
   (cond
     (nil? obj) ::nil
     (.isInstance REXP obj) ::rexp
-    (and (meta obj)
-         (:r-type (meta obj))) (:r-type (meta obj))
-    (#{"[B" "[Ljava.lang.Byte;"} (.getName (class obj))) ::byte-array
-    (#{"[I" "[Ljava.lang.Integer;"} (.getName (class obj))) ::int-array
-    (#{"[D" "[Ljava.lang.Double;"} (.getName (class obj))) ::double-array
-    (= "[Ljava.lang.String;" (.getName (class obj))) ::string-array
+    (and (meta obj) (:r-type (meta obj))) (:r-type (meta obj))
+    (array-of? Byte/TYPE obj) ::byte-array
+    (array-of? Integer/TYPE obj) ::int-array
+    (array-of? Long/TYPE obj) ::long-array
+    (array-of? Double/TYPE obj) ::double-array
+    (array-of? Float/TYPE obj) ::float-array
+    (array-of? String obj) ::string-array
+    (.isArray (class obj)) ::unknown-array-type
     ;;These must go after the array tests or infinite recursion will
     ;;take place
     (seq? obj) ::seq
@@ -189,6 +196,9 @@ otherwise"
 (defmulti to-r
           "Convert the Clojure type to the proper rosuda JRI/R type"
           to-r-dispatch)
+
+(defmethod to-r ::unknown-array-type [obj]
+  (throw (Exception. (str "Do not know how to convert array contents to R objects: " obj))))
 
 (defmethod to-r ::rexp
   [obj]
@@ -213,6 +223,10 @@ otherwise"
   [obj]
   (REXPInteger. obj (r-atts-raw obj)))
 
+(defmethod to-r ::long-array
+  [obj]
+  (REXPInteger. (int-array obj) (r-atts-raw obj)))
+
 (defmethod to-r REXPLogical
   [obj]
   (REXPLogical. (byte-array (map #'byte obj)) (r-atts-raw obj)))
@@ -228,6 +242,10 @@ otherwise"
 (defmethod to-r ::double-array
   [obj]
   (REXPDouble. obj (r-atts-raw obj)))
+
+(defmethod to-r ::float-array
+  [obj]
+  (REXPDouble. (double-array obj) (r-atts-raw obj)))
 
 (defmethod to-r REXPString
   [obj]

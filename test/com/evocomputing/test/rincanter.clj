@@ -45,11 +45,10 @@
   (is (= REXPDouble (class (to-r (with-meta [1.0 2.0 3.0] {:r-type REXPDouble})))))
   (is (= REXPString (class (to-r (with-meta ["fee" "fie" "foe"] {:r-type REXPString})))))
   ;;seq conversions
-  #_(is (= REXPInteger (class (to-r [1 2 3]))))
-  (is (= REXPDouble (class (to-r [1.9 2.0 3.9]))))
-  )
+  (is (= REXPInteger (class (to-r [1 2 3]))))
+  (is (= REXPDouble (class (to-r [1.9 2.0 3.9])))))
 
-#_(deftest pass-through-int-vector
+(deftest pass-through-int-vector
   (r-set! "iv1" (to-r [1 2 3]))
   (is (= [1 2 3] (r-get "iv1"))))
 
