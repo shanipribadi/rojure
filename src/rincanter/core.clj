@@ -16,7 +16,9 @@
 (ns rincanter.core
   (:import (org.rosuda.REngine REXP REngineException REXPMismatchException)
            (org.rosuda.REngine.Rserve RConnection))
-  (:require [rincanter.convert :refer [to-r from-r]]))
+  (:require [rincanter.convert :refer [to-r from-r]]
+            [clojure.java.shell :refer [sh]]
+            [rincanter.proc :as proc]))
 
 (defn get-r
   "Create a RConnection with args ex: "
@@ -119,7 +121,7 @@ clojure code normally"
       (dorun (map #'println (r-eval r "capture.output(str(.printtmp.))"))))))
 
 (defn r-install-CRAN
-  "Tries to install the provided package using the optionally provided
+  "Tries to install the provided package uusing the optionally provided
 repository or the master CRAN repository"
   ([r package]
    (dorun (map #'println
@@ -127,6 +129,16 @@ repository or the master CRAN repository"
   ([r package repo]
    (dorun (map #'println
                (r-eval r (format "capture.output(install.packages(\"%s\", repos=\"%s\"))" package repo))))))
+
+(defn start-rserve
+  "Boot up RServe in another process.
+  Returns a map with a java.lang.Process that can be 'destroy'ed"
+  []
+  (proc/spawn "/usr/bin/R"
+              "--no-save"                                   ;; don't save workspace when quitting
+              "--slave"
+              "-e"                                          ;; evaluate (boot server)
+              "library(Rserve); run.Rserve(args='--no-save --slave');"))
 
 ;;
 ;;Inspection, typechecking and print methods

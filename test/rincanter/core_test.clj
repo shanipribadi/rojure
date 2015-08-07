@@ -25,9 +25,12 @@
 (def ^:dynamic *R* nil)
 
 (defn r-connection-fixture [test-fn]
-  (binding [*R* (get-r "localhost" 7001)]
-    (test-fn)
-    (.close ^RConnection *R*)))
+  (let [p (:process (start-rserve))]
+    (Thread/sleep 1000)                                     ;; allow for server to boot!
+     (binding [*R* (get-r "localhost" 6311)]
+           (test-fn)
+           (.close ^RConnection *R*))
+    (.destroy p)))
 
 (deftest can-connect-to-R
   (is (not (= nil *R*))))
