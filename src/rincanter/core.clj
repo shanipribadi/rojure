@@ -18,64 +18,40 @@
            (org.rosuda.REngine.Rserve RConnection))
   (:require [rincanter.convert :refer [to-r from-r]]))
 
-(defonce ^:dynamic *r-connection* (ref nil))
-
-(defn connect-to-rserve
-  "Initialize the jri engine. This can only be done once in the
-  lifetime of the jvm-- not our rules- that's how the embedded R engine
-  seems to want things."
-  []
-  ;;check for pre-existing jri-engine
-  (when @*r-connection*
-    (throw (IllegalStateException.
-             "JRIEngine can only be initialized once per lifetime of the VM.")))
-  (dosync
-    (ref-set *r-connection*
-             {:jri (RConnection.)})))
-
-(defn get-r-connection
-  "Get the jri-engine. If it doesn't exist, create it using the
-  default init-jri-engine function and return it."
-  []
-  (if @*r-connection*
-    (@*r-connection* :jri)
-    (do (connect-to-rserve)
-        (if @*r-connection*
-          (@*r-connection* :jri)
-          (throw (IllegalStateException.
-                   "Unable to initialize JRIEngine"))))))
+(defn get-r
+  "Create a RConnection with args ex: "
+  [host port]
+  (RConnection. host port))
 
 (defn r-eval-no-catch
   "Eval expression in the R engine. Will not catch any exceptions that
   happen during evaluation"
-  [expression]
-  (let [r (get-r-connection)]
-    (.parseAndEval r expression)))
+  [r expression]
+  (.parseAndEval r expression))
 
 (defn r-eval-raw
   "Eval expression in the R engine. Just return the raw JRI/R wrapper,
   don't convert to Clojure object"
-  [expression]
-  (let [r (get-r-connection)]
-    (try
+  [r expression]
+      (try
       (.parseAndEval r expression)
       (catch REngineException ex
         (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))
       (catch REXPMismatchException ex
-        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex))))))
+        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))))
 
 (defn r-eval
   "Eval expression in the R engine. Convert the return value from
   JRI/R to Clojure"
-  [expression]
-  (from-r (r-eval-raw expression)))
+  [r expression]
+  (from-r (r-eval-raw r expression)))
 
 (defn r-try-parse-eval
   "Eval expression in the R engine, wrapped (on the R side) in
   try/catch. Will catch errors on the R side and convert to Exception
   and throw"
-  [expression]
-  (let [r (get-r-connection)]
+  [r expression]
+
     (try
       (.assign r ".tmp." expression)
       (let [rexp (.parseAndEval r "try(eval(parse(text=.tmp.)),silent=TRUE)")]
@@ -87,71 +63,70 @@
       (catch REngineException ex
         (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))
       (catch REXPMismatchException ex
-        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex))))))
+        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))))
 
 (defmacro with-r-eval-no-catch
   "Evaluate forms that are string using r-eval-no-catch, otherwise, just eval
 clojure code normally"
-  [& forms]
-  `(do ~@(map #(if (string? %) (list 'r-eval-no-catch %) %) forms)))
+  [r & forms]
+  `(do ~@(map #(if (string? %) (list 'r-eval-no-catch r %) %) forms)))
 
 (defmacro with-r-eval-raw
   "Evaluate forms that are string using r-eval-raw, otherwise, just eval
   Clojure code normally"
-  [& forms]
-  `(do ~@(map #(if (string? %) (list 'r-eval %) %) forms)))
+  [r & forms]
+  `(do ~@(map #(if (string? %) (list 'r-eval r %) %) forms)))
 
 (defmacro with-r-eval
   "Evaluate forms that are string using r-eval, otherwise, just eval
   Clojure code normally"
-  [& forms]
-  `(do ~@(map #(if (string? %) (list 'r-eval %) %) forms)))
+  [r & forms]
+  `(do ~@(map #(if (string? %) (list 'r-eval r %) %) forms)))
 
 (defmacro with-r-try-parse-eval
   "Evaluate forms that are string using r-try-parse-eval, otherwise
   just eval Clojure code normally"
-  [& forms]
-  `(do ~@(map #(if (string? %) (list 'r-try-parse-eval %) %) forms)))
+  [r & forms]
+  `(do ~@(map #(if (string? %) (list 'r-try-parse-eval r %) %) forms)))
 
 (defn r-set!
   "Assign r-name to value within the R engine"
-  [r-name value]
-  (let [r (get-r-connection)]
+  [r r-name value]
     (try
       (.assign r r-name value)
       (catch REngineException ex
-        (println (format "Caught exception assigning R value: %s\n: %s" r-name ex))))))
+        (println (format "Caught exception assigning R value: %s\n: %s" r-name ex)))))
 
 (defn r-get-raw
   "Retrieve the value with this name in the R engine. Do not convert
   from JRI to Clojure type."
-  [r-name]
-  (r-eval-raw r-name))
+  [r r-name]
+  (r-eval-raw r r-name))
 
 (defn r-get
   "Retrieve the value with this name in the R engine"
-  [r-name]
-  (r-eval r-name))
+  [r r-name]
+  (r-eval r r-name))
 
 (defn r-inspect
   "Runs str(object) on the R side, capturing console output. Runs
   println on returned Strings"
-  [obj]
+  [r obj]
   (if (string? obj)
-    (dorun (map #'println (r-eval (format "capture.output(str(%s))" obj))))
+    (dorun (map #'println (r-eval r (format "capture.output(str(%s))" obj))))
     (do
-      (r-set! ".printtmp." (if (instance? REXP obj) obj (to-r obj)))
-      (dorun (map #'println (r-eval "capture.output(str(.printtmp.))"))))))
+      (r-set! r ".printtmp." (if (instance? REXP obj) obj (to-r obj)))
+      (dorun (map #'println (r-eval r "capture.output(str(.printtmp.))"))))))
 
 (defn r-install-CRAN
   "Tries to install the provided package using the optionally provided
 repository or the master CRAN repository"
-  ([package]
+  ([r package]
    (dorun (map #'println
-               (r-eval (format "capture.output(install.packages(\"%s\", repos=\"http://cran.r-project.org\"))" package)))))
-  ([package repo]
+               (r-eval r (format "capture.output(install.packages(\"%s\", repos=\"http://cran.r-project.org\"))" package)))))
+  ([r package repo]
    (dorun (map #'println
-               (r-eval (format "capture.output(install.packages(\"%s\", repos=\"%s\"))" package repo))))))
+               (r-eval r (format "capture.output(install.packages(\"%s\", repos=\"%s\"))" package repo))))))
 
 ;;
 ;;Inspection, typechecking and print methods

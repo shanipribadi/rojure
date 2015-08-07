@@ -22,16 +22,15 @@
   (:use (rincanter core)))
 
 ;;taken from incanter information_theory_tests.clj
-(defn =within [delta x y]
-  (>= delta (abs (- x y))))
+(def ^:dynamic *R* nil)
 
-(defn jri-engine-fixture [test-fn]
-  (get-r-connection)
-  (test-fn)
-  (.close ^RConnection  (get-r-connection)))
+(defn r-connection-fixture [test-fn]
+  (binding [*R* (get-r "localhost" 7001)]
+    (test-fn)
+    (.close ^RConnection *R*)))
 
 (deftest can-connect-to-R
-  (is (not (= nil (get-r-connection)))))
+  (is (not (= nil *R*))))
 
 (deftest to-r-conversions
   (is (= REXPLogical (class (to-r (into-array Byte/TYPE (map #'byte [1 2 3]))))))
@@ -47,48 +46,48 @@
   ;;seq conversions
   (is (= REXPInteger (class (to-r [1 2 3]))))
   (is (= REXPDouble (class (to-r [1.9 2.0 3.9]))))
-  (is (= (dataset ["c1" "c2"] '((1 2) (3 4))) (from-r (to-r (dataset ["c1" "c2"] '((1 2) (3 4))))))))
+  #_(is (= (dataset ["c1" "c2"] '((1 2) (3 4))) (from-r (to-r (dataset ["c1" "c2"] '((1 2) (3 4))))))))
 
 (deftest pass-through-int-vector
-  (r-set! "iv1" (to-r [1 2 3]))
-  (is (= [1 2 3] (r-get "iv1"))))
+  (r-set! *R* "iv1" (to-r [1 2 3]))
+  (is (= [1 2 3] (r-get *R* "iv1"))))
 
-#_(deftest from-r-int-vector
-  (r-eval "iv2 = c(1, 2, 3)")
-  (is (= [1 2 3] (r-get "iv2"))))
+(deftest from-r-int-vector
+  (r-eval *R* "iv2 = c(1, 2, 3)")
+  (is (= [1 2 3] (r-get *R* "iv2"))))
 
 (deftest pass-through-double-vector
-  (r-set! "dv1" (to-r [1.0 2.0 3.0]))
-  (is (= [1.0 2.0 3.0] (r-get "dv1"))))
+  (r-set! *R* "dv1" (to-r [1.0 2.0 3.0]))
+  (is (= [1.0 2.0 3.0] (r-get *R* "dv1"))))
 
 (deftest from-r-double-vector
-  (r-eval "dv2 = c(1.0, 2.0, 3.0)")
-  (is (= [1.0 2.0 3.0] (r-get "dv2"))))
+  (r-eval *R* "dv2 = c(1.0, 2.0, 3.0)")
+  (is (= [1.0 2.0 3.0] (r-get *R* "dv2"))))
 
 (deftest convert-dataframe-to-dataset
   (with-r-eval
     "data(iris)"
     ;;starts off an R dataframe, turns into an incanter dataset
-    (is (= (type (r-get "iris")) incanter.core.Dataset))))
+    (is (= (type (r-get *R* "iris")) incanter.core.Dataset))))
 
 (deftest dataframe-dataset-dim-equivalence
-  (is (= [150 5] (r-eval "dim(iris)")))
-  (is (= [150 5] (dim (r-get "iris")))))
+  (is (= [150 5] (r-eval *R* "dim(iris)")))
+  (is (= [150 5] (dim (r-get *R* "iris")))))
 
 (deftest pass-through-dataframe-equivalence
   (with-r-eval
     "data(iris)"
     ;;convert iris dataframe to an incanter dataset, then convert back
     ;;to an R dataframe and set it in the R environment
-    (r-set! "irisds" (to-r (r-get "iris")))
+    (r-set! *R* "irisds" (to-r (r-get *R* "iris")))
     ;;irisds is now an R dataframe it should be identical to iris dataframe
-    (is (r-true (r-eval "identical(irisds, iris)")))))
+    (is (r-true (r-eval *R* "identical(irisds, iris)")))))
 
 (deftest dataframe-dataset-mean
-  (with-data (r-get "iris")
-    (is (=within 0.000001
+  (with-data (r-get *R* "iris")
+    (is (within 0.000001
                  (mean ($ :Sepal.Width))
-                 ((r-eval "mean(iris$Sepal.Width)") 0)))))
+                 ((r-eval *R* "mean(iris$Sepal.Width)") 0)))))
 
-(use-fixtures :once jri-engine-fixture)
+(use-fixtures :once r-connection-fixture)
 

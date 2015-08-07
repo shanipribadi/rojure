@@ -14,11 +14,11 @@
 ;; May 5, 2015
 
 (ns rincanter.convert
+  (:require [incanter.core :refer [with-data col-names $ dataset categorical-var dataset?]]
+            [clojure.core.incubator :refer [seqable?]] )
   (:import (org.rosuda.REngine REXPNull REXP RList REXPList REXPGenericVector
                                REXPInteger REXPDouble REXPString REXPLogical
-                               RFactor REXPFactor))
-  (:require [incanter.core :refer [with-data col-names $ dataset categorical-var dataset?]]
-            [clojure.core.incubator :refer [seqable?]]))
+                               RFactor REXPFactor)))
 
 (declare from-r)
 (declare to-r)
