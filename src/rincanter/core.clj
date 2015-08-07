@@ -130,11 +130,19 @@ repository or the master CRAN repository"
    (dorun (map #'println
                (r-eval r (format "capture.output(install.packages(\"%s\", repos=\"%s\"))" package repo))))))
 
+(defn- r-path
+  "Find path to R executable"
+  []
+  (apply str
+         (-> (sh "which" "R")
+             (get :out)
+             (butlast))))                                   ;; avoid trailing newline
+
 (defn start-rserve
   "Boot up RServe in another process.
   Returns a map with a java.lang.Process that can be 'destroy'ed"
   []
-  (proc/spawn "/usr/bin/R"
+  (proc/spawn (r-path)
               "--no-save"                                   ;; don't save workspace when quitting
               "--slave"
               "-e"                                          ;; evaluate (boot server)
