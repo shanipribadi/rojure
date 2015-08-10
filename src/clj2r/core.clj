@@ -25,6 +25,11 @@
   [host port]
   (RConnection. host port))
 
+(defn get-connection
+  "Get connection using default port"
+  []
+  (get-r "localhost" 6311))
+
 (defn r-eval-no-catch
   "Eval expression in the R engine. Will not catch any exceptions that
   happen during evaluation"
@@ -139,7 +144,7 @@ repository or the master CRAN repository"
              (butlast))))                                   ;; avoid trailing newline
 
 (defn start-rserve
-  "Boot up RServe in another process.
+  "Boot up RServe on default port in another process.
   Returns a map with a java.lang.Process that can be 'destroy'ed"
   []
   (proc/spawn (r-path)
