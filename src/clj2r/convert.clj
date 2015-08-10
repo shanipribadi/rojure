@@ -14,7 +14,7 @@
 ;; May 5, 2015
 
 (ns clj2r.convert
-  (:require [clj2r.core :refer [with-data col-names $ dataset categorical-var dataset?]]
+  (:require [incanter.core :refer [with-data col-names $ dataset categorical-var dataset?]]
             [clojure.core.incubator :refer [seqable?]] )
   (:import (org.rosuda.REngine REXPNull REXP RList REXPList REXPGenericVector
                                REXPInteger REXPDouble REXPString REXPLogical
