@@ -13,13 +13,13 @@
 ;; Modified work by svarcheg https://github.com/svarcheg/rincanter
 ;; May 5, 2015
 
-(ns rincanter.core-test
+(ns clj2r.core-test
   (:import (org.rosuda.REngine REXPInteger REXPDouble REXPString REXPLogical)
            (org.rosuda.REngine.Rserve RConnection))
   (:use (clojure test))
   (:use (incanter core stats))
-  (:use (rincanter convert))
-  (:use (rincanter core)))
+  (:use (clj2r convert))
+  (:use (clj2r core)))
 
 ;;taken from incanter information_theory_tests.clj
 (def ^:dynamic *R* nil)

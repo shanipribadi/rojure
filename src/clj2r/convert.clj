@@ -13,8 +13,8 @@
 ;; Modified work by svarcheg https://github.com/svarcheg/rincanter
 ;; May 5, 2015
 
-(ns rincanter.convert
-  (:require [incanter.core :refer [with-data col-names $ dataset categorical-var dataset?]]
+(ns clj2r.convert
+  (:require [clj2r.core :refer [with-data col-names $ dataset categorical-var dataset?]]
             [clojure.core.incubator :refer [seqable?]] )
   (:import (org.rosuda.REngine REXPNull REXP RList REXPList REXPGenericVector
                                REXPInteger REXPDouble REXPString REXPLogical

@@ -13,12 +13,12 @@
 ;; Modified work by svarcheg https://github.com/svarcheg/rincanter
 ;; May 5, 2015
 
-(ns rincanter.core
+(ns clj2r.core
   (:import (org.rosuda.REngine REXP REngineException REXPMismatchException)
            (org.rosuda.REngine.Rserve RConnection))
-  (:require [rincanter.convert :refer [to-r from-r]]
+  (:require [clj2r.convert :refer [to-r from-r]]
             [clojure.java.shell :refer [sh]]
-            [rincanter.proc :as proc]))
+            [clj2r.proc :as proc]))
 
 (defn get-r
   "Create a RConnection with args ex: "
