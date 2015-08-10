@@ -27,7 +27,7 @@
 (defn r-connection-fixture [test-fn]
   (let [p (:process (start-rserve))]
     (Thread/sleep 1000)                                     ;; allow for server to boot!
-     (binding [*R* (get-r "localhost" 6311)]
+     (binding [*R* (get-r)]
            (test-fn)
            (.close ^RConnection *R*))
     (.destroy p)))
