@@ -142,13 +142,14 @@ repository or the master CRAN repository"
 
 (defn start-rserve
   "Boot up RServe on default port in another process.
-  Returns a map with a java.lang.Process that can be 'destroy'ed"
-  []
-  (proc/spawn (r-path)
-              "--no-save"                                   ;; don't save workspace when quitting
-              "--slave"
-              "-e"                                          ;; evaluate (boot server)
-              "library(Rserve); run.Rserve(args='--no-save --slave');"))
+   Returns a map with a java.lang.Process that can be 'destroy'ed"
+  ([] (start-rserve 6311))
+  ([port]
+   (proc/spawn (r-path)
+               "--no-save"                                   ;; don't save workspace when quitting
+               "--slave"
+               "-e"                                          ;; evaluate (boot server)
+               (format "library(Rserve); run.Rserve(args='--no-save --slave', port=%s);" port))))
 
 ;;
 ;;Inspection, typechecking and print methods
