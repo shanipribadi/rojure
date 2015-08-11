@@ -55,9 +55,17 @@
   (r-set! *R* "iv1" (to-r [1 2 3]))
   (is (= [1 2 3] (r-get *R* "iv1"))))
 
-(deftest from-r-int-vector
-  (r-eval *R* "iv2 = c(1, 2, 3)")
-  (is (= [1 2 3] (r-get *R* "iv2"))))
+;(deftest from-r-int-vector
+;  (r-eval *R* "iv2 = c(1, 2, 3)")
+;  (is (= [1 2 3] (r-get *R* "iv2"))))
+
+(deftest from-r-double
+  (r-eval *R* "x = 42")
+  (is (= [42.0] (r-get *R* "x"))))
+
+(deftest from-r-named-list
+  (r-eval *R* "nl = list(foo=2,bar=3)")
+  (is (= (array-map "foo" 2.0 "bar" 3.0) (r-get *R* "nl"))))
 
 (deftest pass-through-double-vector
   (r-set! *R* "dv1" (to-r [1.0 2.0 3.0]))

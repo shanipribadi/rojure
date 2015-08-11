@@ -108,7 +108,9 @@ otherwise"
 (def-from-r rexp REXPInteger (vec (.asIntegers rexp)))
 (def-from-r rexp REXPDouble (vec (.asDoubles rexp)))
 (def-from-r rexp REXPString (vec (.asStrings rexp)))
-(def-from-r rexp RList (vec (map from-r rexp)))
+(def-from-r rexp RList (if (.isNamed rexp)
+                         (apply array-map (interleave (.keys rexp) (map from-r (.values rexp))))
+                         (vec (map from-r rexp))))
 (def-from-r rexp REXPGenericVector (from-r (.asList rexp)))
 
 (defn r-factor-to-categorical-var
@@ -144,7 +146,11 @@ otherwise"
   (let [names (from-r (r-attr dataframe "names"))
         cols (from-r (.asList dataframe))
         col-meta (zipmap names (map meta cols))
-        ds (partition (count names) (apply interleave cols))
+        ds (if (instance? clojure.lang.IPersistentMap cols)
+             (->> (for [k (keys cols)]
+                  (get cols k))
+                 (apply mapv vector))
+             (partition (count names) (apply interleave cols)))
         dataset (dataset names ds)]
     (with-meta dataset (merge (meta dataset)
                               {:col-meta col-meta
