@@ -91,6 +91,18 @@
   (is (= [150 5] (r-eval *R* "dim(iris)")))
   (is (= [150 5] (dim (r-get *R* "iris")))))
 
+(deftest metadata
+  (let [iris-dataframe (r-eval-raw *R* "iris")
+        names (from-r (r-attr iris-dataframe "names"))
+        cols (from-r (.asList iris-dataframe))
+        col-meta (zipmap names (map meta cols))]
+    (is (= (get-in col-meta ["Species" :category-variable :labels])
+           ["setosa" "versicolor" "virginica"]))))
+
+(deftest factors
+  (let [iris (r-eval *R* "iris")]
+    (is (= (get (first (:rows iris)) "Sepal.Length")) 5.1)))
+
 (deftest pass-through-dataframe-equivalence
   (with-r-eval
     "data(iris)"
