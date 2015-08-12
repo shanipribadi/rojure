@@ -63,9 +63,15 @@
   (r-eval *R* "x = 42")
   (is (= [42.0] (r-get *R* "x"))))
 
+(deftest from-r-list
+  (let [l (r-eval *R* "list(1,2,3)")]
+    (is (= [[1.0] [2.0] [3.0]] l))))
+
 (deftest from-r-named-list
   (r-eval *R* "nl = list(foo=2,bar=3)")
-  (is (= (array-map "foo" 2.0 "bar" 3.0) (r-get *R* "nl"))))
+  (let [arraymap (array-map "foo" [2.0] "bar" [3.0])
+        nl (r-get *R* "nl")]
+    (is (= arraymap nl))))
 
 (deftest pass-through-double-vector
   (r-set! *R* "dv1" (to-r [1.0 2.0 3.0]))
