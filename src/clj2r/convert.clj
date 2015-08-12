@@ -144,7 +144,7 @@ otherwise"
     (throw IllegalArgumentException
            "Must be R class data.frame"))
   (let [names (from-r (r-attr dataframe "names"))
-        cols (from-r (.asList dataframe))
+        cols (map from-r (.asList dataframe))
         col-meta (zipmap names (map meta cols))
         ds (if (instance? clojure.lang.IPersistentMap cols)
              (->> (for [k (keys cols)]

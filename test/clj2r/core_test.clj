@@ -94,7 +94,7 @@
 (deftest metadata
   (let [iris-dataframe (r-eval-raw *R* "iris")
         names (from-r (r-attr iris-dataframe "names"))
-        cols (from-r (.asList iris-dataframe))
+        cols (map from-r (.asList iris-dataframe))
         col-meta (zipmap names (map meta cols))]
     (is (= (get-in col-meta ["Species" :category-variable :labels])
            ["setosa" "versicolor" "virginica"]))))
