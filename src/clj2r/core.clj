@@ -69,6 +69,11 @@
       (catch REXPMismatchException ex
         (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))))
 
+(defn try-r-eval
+  [r rexp]
+  (-> (r-try-parse-eval r rexp)
+      from-r))
+
 (defmacro with-r-eval-no-catch
   "Evaluate forms that are string using r-eval-no-catch, otherwise, just eval
 clojure code normally"
