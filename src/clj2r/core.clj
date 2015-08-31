@@ -140,6 +140,7 @@ repository or the master CRAN repository"
 (defn- r-path
   "Find path to R executable"
   []
+  {:post [(not= % "")]}
   (apply str
          (-> (sh "which" "R")
              (get :out)
