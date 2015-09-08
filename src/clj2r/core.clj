@@ -33,6 +33,9 @@
   [r expression]
   (.parseAndEval r expression))
 
+(defn r-void-eval "Eval the exp in R, without returning any output" [r expression]
+  (.voidEval r expression))
+
 (defn r-eval-raw
   "Eval expression in the R engine. Just return the raw JRI/R wrapper,
   don't convert to Clojure object"
