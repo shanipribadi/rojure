@@ -1,5 +1,5 @@
-(defproject skm-ice/clj2r
-  "0.0.1-SNAPSHOT"
+(defproject skm-ice/rincanter
+  "0.0.2-SNAPSHOT"
   :description "Clojure/R integration using rosuda Rserve"
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [incanter/incanter-core "1.5.6"]
