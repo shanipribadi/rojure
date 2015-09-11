@@ -281,7 +281,7 @@ otherwise"
   (with-data dataset
              (let [names (into-array String (map name (col-names dataset)))
                    col-meta (or (:col-meta (meta dataset)) {})
-                   cols (into {} (map #(let [col ($ %)]
+                   cols (into [] (map #(let [col ($ %)]
                                          (with-meta col (col-meta (aget names %))))
                                       (range (alength names))))
                    colarr (into-array REXP (map to-r cols))]
