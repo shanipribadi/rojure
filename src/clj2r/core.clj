@@ -101,13 +101,16 @@ clojure code normally"
   [r & forms]
   `(do ~@(map #(if (string? %) (list 'r-try-parse-eval r %) %) forms)))
 
-(defn r-set!
+(defn r-set-raw!
   "Assign r-name to value within the R engine"
   [r r-name value]
     (try
       (.assign r r-name value)
       (catch REngineException ex
         (println (format "Caught exception assigning R value: %s\n: %s" r-name ex)))))
+
+(defn r-set! [r r-name value]
+  (r-set-raw! r r-name (to-r value)))
 
 (defn r-get-raw
   "Retrieve the value with this name in the R engine. Do not convert
@@ -127,7 +130,7 @@ clojure code normally"
   (if (string? obj)
     (dorun (map #'println (r-eval r (format "capture.output(str(%s))" obj))))
     (do
-      (r-set! r ".printtmp." (if (instance? REXP obj) obj (to-r obj)))
+      (r-set-raw! r ".printtmp." (if (instance? REXP obj) obj (to-r obj)))
       (dorun (map #'println (r-eval r "capture.output(str(.printtmp.))"))))))
 
 (defn r-install-CRAN
