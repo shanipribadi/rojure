@@ -279,14 +279,14 @@ otherwise"
 (defmethod to-r ::dataframe
   [dataset]
   (with-data dataset
-             (let [names (into-array String (col-names dataset))
-                   col-meta (:col-meta (meta dataset))
-                   cols (vec (map #(let [col ($ %)] (with-meta col (col-meta (aget names %))))
+             (let [names (into-array String (map name (col-names dataset)))
+                   col-meta (or (:col-meta (meta dataset)) {})
+                   cols (into {} (map #(let [col ($ %)]
+                                         (with-meta col (col-meta (aget names %))))
                                       (range (alength names))))
                    colarr (into-array REXP (map to-r cols))]
-               (REXPGenericVector.
-                 (RList. colarr names)
-                 (:r-atts (meta dataset))))))
+               (org.rosuda.REngine.REXP/createDataFrame
+                 (RList. colarr names)))))
 
 (defmethod to-r ::nil [_]
   nil)
