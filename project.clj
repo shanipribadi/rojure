@@ -8,9 +8,11 @@
                  [org.clojure/core.incubator "0.1.3"]
                  [org.rosuda.REngine/Rserve "1.8.1"]]
 
-  :profiles {:deployer {:repositories [["snapshots" "file:///var/go/mvn-repo/snapshots"]
-                                       ["releases" "file:///var/go/mvn-repo/releases"]]}}
-
+  :profiles {:deployer {:repositories [["snapshots" {:url "file:///var/go/mvn-repo/"
+                                                     :sign-releases false}]
+                                       ["releases" {:url "file:///var/go/mvn-repo/"
+                                                    :creds nil
+                                                    :sign-releases false}]]}}
   :plugins [[lein-kibit "0.1.2"]
             [lein-ancient "0.6.7"]
             [lein-bikeshed "0.2.0"]
