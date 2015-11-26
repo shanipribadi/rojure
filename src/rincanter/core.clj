@@ -156,7 +156,7 @@ repository or the master CRAN repository"
    Returns a map with a java.lang.Process that can be 'destroy'ed"
   ([] (start-rserve 6311))
   ([port init-r]
-   (let [rstr  (format "%s library(Rserve); run.Rserve(args='--no-save --slave', port=%s);" init-r port)]
+   (let [rstr  (format "%s ;library(Rserve); run.Rserve(args='--no-save --slave', port=%s);" init-r port)]
      (prn rstr)
      (proc/spawn (r-path)
                  "--no-save"                                   ;; don't save workspace when quitting
