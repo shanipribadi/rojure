@@ -155,8 +155,8 @@ repository or the master CRAN repository"
   "Boot up RServe on default port in another process.
    Returns a map with a java.lang.Process that can be 'destroy'ed"
   ([] (start-rserve 6311))
-  ([port init-r]
-   (let [rstr  (format "%s ;library(Rserve); run.Rserve(args='--no-save --slave', port=%s);" init-r port)]
+  ([port]
+   (let [rstr  (format "library(Rserve); run.Rserve(args='--no-save --slave', port=%s);" port)]
      (prn rstr)
      (proc/spawn (r-path)
                  "--no-save"                                   ;; don't save workspace when quitting
