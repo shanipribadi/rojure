@@ -141,8 +141,7 @@ otherwise"
 (defmethod from-r ::dataframe
   [dataframe]
   (if-not (dataframe? dataframe)
-    (throw IllegalArgumentException
-           "Must be R class data.frame"))
+    (throw (IllegalArgumentException. "Must be R class data.frame")))
   (let [names (from-r (r-attr dataframe "names"))
         cols (map from-r (.asList dataframe))
         col-meta (zipmap names (map meta cols))
