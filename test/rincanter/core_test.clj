@@ -85,7 +85,7 @@
   (with-r-eval
     "data(iris)"
     ;;starts off an R dataframe, turns into an incanter dataset
-    (is (= (type (r-get *R* "iris")) incanter.core.Dataset))))
+    (is (= (type (r-get *R* "iris")) clojure.core.matrix.impl.dataset.DataSet)))) ;TODO fix class
 
 (deftest dataframe-dataset-dim-equivalence
   (is (= [150 5] (r-eval *R* "dim(iris)")))
@@ -115,7 +115,7 @@
 (deftest dataframe-dataset-mean
   (with-data (r-get *R* "iris")
     (is (within 0.000001
-                 (mean ($ :Sepal.Width))
+                (mean ($ "Sepal.Width"))
                  ((r-eval *R* "mean(iris$Sepal.Width)") 0)))))
 
 (use-fixtures :once r-connection-fixture)

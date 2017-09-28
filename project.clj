@@ -1,8 +1,8 @@
 (defproject skm-ice/rincanter
-  "0.0.3-SNAPSHOT"
+  "0.1-SNAPSHOT"
   :description "Clojure/R integration using rosuda Rserve"
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [incanter/incanter-core "1.5.6"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [incanter/incanter-core "1.9.0"]
                  [org.clojure/tools.logging "0.3.1"]
                  [org.rosuda.REngine/REngine "2.1.0"]
                  [org.clojure/core.incubator "0.1.3"]
