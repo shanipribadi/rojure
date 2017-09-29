@@ -118,5 +118,28 @@
                 (mean ($ "Sepal.Width"))
                  ((r-eval *R* "mean(iris$Sepal.Width)") 0)))))
 
+
+
+(deftest get-matrix
+   "get matrix from R"
+  (let [m (r-get *R* "matrix(c(1,2,3,4,5,6),nrow=2)")]
+    (is (matrix? m))
+    (is (= [2 3] (dim m)))
+    )
+  ) 
+
+(deftest set-matrix
+  (r-set! *R* "mat"  (matrix [1 2 3 4 5 6] 2))
+  (is (= ["matrix"] (r-eval *R* "class(mat)")))
+  (is (= [3 2] (r-eval *R* "dim(mat)")))
+  (is (= [1.0 3.0 5.0 2.0 4.0 6.0] (r-eval *R* "as.vector(mat)"))))
+
+(deftest set-matrix-eigen
+  (r-set! *R* "mat"  (matrix [1 2 3 4] 2))
+  (r-void-eval *R* "eig=eigen(mat)")
+  (is (= [5.372281323269014 -0.3722813232690143] (get (r-get *R* "eig") "values"))))
+
+
+
 (use-fixtures :once r-connection-fixture)
 

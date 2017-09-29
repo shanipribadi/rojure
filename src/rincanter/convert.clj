@@ -14,8 +14,13 @@
 ;; May 5, 2015
 
 (ns rincanter.convert
-  (:require [incanter.core :refer [with-data col-names $ dataset categorical-var dataset?]]
-            [clojure.core.incubator :refer [seqable?]] )
+  (:require [incanter.core :refer [with-data col-names $ dataset categorical-var dataset? matrix matrix?]]
+            [clojure.core.incubator :refer [seqable?]]
+
+
+            clojure.core.matrix
+            clojure.core.matrix.impl.double-array
+            )
   (:import (org.rosuda.REngine REXPNull REXP RList REXPList REXPGenericVector
                                REXPInteger REXPDouble REXPString REXPLogical
                                RFactor REXPFactor)))
@@ -89,6 +94,7 @@ otherwise"
   (cond
     (nil? rexp) ::nil
     (dataframe? rexp) ::dataframe
+    (get (r-atts rexp) "dim") ::matrix
     true (class rexp)))
 
 (defmulti from-r
@@ -106,7 +112,7 @@ otherwise"
 
 (def-from-r rexp REXPLogical (vec (.isTrue rexp)))
 (def-from-r rexp REXPInteger (vec (.asIntegers rexp)))
-(def-from-r rexp REXPDouble (vec (.asDoubles rexp)))
+(def-from-r rexp REXPDouble  (vec (.asDoubles rexp)))
 (def-from-r rexp REXPString (vec (.asStrings rexp)))
 (def-from-r rexp RList (if (.isNamed rexp)
                          (apply array-map (interleave (.keys rexp) (map from-r (.values rexp))))
@@ -155,6 +161,11 @@ otherwise"
                               {:col-meta col-meta
                                :r-type   ::dataframe
                                :r-atts   (r-atts-raw dataframe)}))))
+
+(defmethod from-r ::matrix
+  [rexp]
+  (matrix (.asDoubleMatrix rexp)))
+
 (defmethod from-r REXPNull
   [_]
   nil)
@@ -186,6 +197,7 @@ otherwise"
     (.isInstance REXP obj) ::rexp
     (and (meta obj) (:r-type (meta obj))) (:r-type (meta obj))
     (dataset? obj) ::dataframe
+    (matrix? obj)  ::matrix 
     (array-of? Byte/TYPE obj) ::byte-array
     (array-of? Integer/TYPE obj) ::int-array
     (array-of? Long/TYPE obj) ::long-array
@@ -286,6 +298,10 @@ otherwise"
                    colarr (into-array REXP (map to-r cols))]
                (org.rosuda.REngine.REXP/createDataFrame
                  (RList. colarr names)))))
+(defmethod to-r ::matrix
+  [mat]
+  (org.rosuda.REngine.REXP/createDoubleMatrix
+   (clojure.core.matrix.impl.double-array/to-double-arrays  mat)))
 
 (defmethod to-r ::nil [_]
   nil)
