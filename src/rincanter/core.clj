@@ -20,6 +20,7 @@
             [clojure.java.shell :refer [sh]]
             [rincanter.proc :as proc]))
 
+
 (defn get-r
   "Create a RConnection with args ex: "
   ([host port]

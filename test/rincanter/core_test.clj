@@ -14,11 +14,10 @@
 ;; May 5, 2015
 
 (ns rincanter.core-test
-  (:require [clojure.core.matrix :refer [matrix matrix?]]
-            [clojure.core.matrix.dataset :refer [row-maps]]
+  (:require [clojure.core.matrix :refer [matrix matrix? shape mget]]
+            [clojure.core.matrix.stats :refer [mean]]
+            [clojure.core.matrix.dataset :refer [row-maps column-names column dataset]]
             [clojure.test :refer :all]
-            [incanter.core :refer [$ dataset dim with-data col-names]]
-            [incanter.stats :refer [mean within]]
             [rincanter.convert :refer [from-r r-attr r-true to-r]]
             [rincanter.core :refer :all])
   (:import [org.rosuda.REngine REXPDouble REXPInteger REXPLogical REXPString]
@@ -26,6 +25,19 @@
 
 ;;taken from incanter information_theory_tests.clj
 (def ^:dynamic *R* nil)
+
+
+(defn scalar-abs
+  "Fast absolute value function"
+  [x]
+  (if (< x 0)
+    (*' -1 x)
+    x))
+
+(defn within
+  "y is within z of x in metric space."
+  [z x y]
+    (< (scalar-abs (- x y)) z))
 
 (defn r-connection-fixture [test-fn]
   (let [p (:process (start-rserve))]
@@ -92,7 +104,7 @@
 
 (deftest dataframe-dataset-dim-equivalence
   (is (= [150 5] (r-eval *R* "dim(iris)")))
-  (is (= [150 5] (dim (r-get *R* "iris")))))
+  (is (= [150 5] (shape(r-get *R* "iris")))))
 
 (deftest metadata
   (let [iris-dataframe (r-eval-raw *R* "iris")
@@ -116,9 +128,9 @@
     (is (r-true (r-eval *R* "identical(irisds, iris)")))))
 
 (deftest dataframe-dataset-mean
-  (with-data (r-get *R* "iris")
+  (let [data  (r-get *R* "iris")]
     (is (within 0.000001
-                (mean ($ "Sepal.Width"))
+                (mean (column data "Sepal.Width"))
                  ((r-eval *R* "mean(iris$Sepal.Width)") 0)))))
 
 
@@ -127,7 +139,7 @@
    "get matrix from R"
   (let [m (r-get *R* "matrix(c(1,2,3,4,5,6),nrow=2)")]
     (is (matrix? m))
-    (is (= [2 3] (dim m))))) 
+    (is (= [2 3] (shape m))))) 
 
 (deftest set-matrix
   (r-set! *R* "mat"  (clojure.core.matrix/matrix [[1 2 3] [4 5 6]]))
@@ -146,8 +158,8 @@
             (dataset [[1 2 3][1 2 3]])
             "test.R"
             )]
-    (is (= 2.0 ($ 0 0 ds)))
-    (is (= ["n" (col-names ds)]))))
+    (is (= 2 (mget ds 0 0)))
+    (is (= ["n" (column-names ds)]))))
 
 (deftest r-transorm-ds-with-r
   (let [ds (rincanter.core/r-transform-ds
@@ -155,8 +167,8 @@
             (dataset [[1 2 3][1 2 3]])
             "test.R"
             )]
-    (is (= 2.0 ($ 0 0 ds)))
-    (is (= ["n" (col-names ds)]))))
+    (is (= 2 (mget ds 0 0)))
+    (is (= ["n" (column-names ds)]))))
 
 
 (use-fixtures :once r-connection-fixture)

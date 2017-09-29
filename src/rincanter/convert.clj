@@ -14,10 +14,9 @@
 ;; May 5, 2015
 
 (ns rincanter.convert
-  (:require [incanter.core :refer [with-data col-names $ dataset categorical-var dataset?]]
+  (:require
             [clojure.core.incubator :refer [seqable?]]
-
-
+            [clojure.core.matrix.dataset :refer[column-names column dataset dataset?]]
             [clojure.core.matrix :refer[matrix matrix?]]
             clojure.core.matrix.impl.double-array
             )
@@ -27,6 +26,40 @@
 
 (declare from-r)
 (declare to-r)
+
+(defn categorical-var
+  "
+  Returns a categorical variable based on the values in the given collection.
+  Equivalent to R's factor function.
+
+  Options:
+    :data (default nil) factors will be extracted from the given data.
+    :ordered? (default false) indicates that the variable is ordinal.
+    :labels (default (sort (into #{} data)))
+    :levels (range (count labels))
+
+  Examples:
+    (categorical-var :data [:a :a :c :b :a :c :c])
+    (categorical-var :labels [:a :b :c])
+    (categorical-var :labels [:a :b :c] :levels [10 20 30])
+    (categorical-var :levels [1 2 3])
+
+  "
+  ([& {:keys [data ordered? labels levels] :or {ordered? false}}]
+    (let [labels (or labels
+                     (if (nil? data)
+                        levels
+                        (sort (into #{} data))))
+          levels (or levels (range (count labels)))]
+      {:ordered? ordered?
+       :labels labels
+       :levels levels
+       :to-labels (apply assoc {} (interleave levels labels))
+       :to-levels (apply assoc {} (interleave labels levels))})))
+
+
+
+
 
 (defn r-attr-names
   "Return a seq of attributes, or nil if the REXP has no attributes"
@@ -289,15 +322,14 @@ otherwise"
 
 (defmethod to-r ::dataframe
   [dataset]
-  (with-data dataset
-    (let [names (into-array String (map (comp name str) (col-names dataset)))
-                   col-meta (or (:col-meta (meta dataset)) {})
-                   cols (into [] (map #(let [col ($ %)]
-                                         (with-meta col (col-meta (aget names %))))
-                                      (range (alength names))))
-                   colarr (into-array REXP (map to-r cols))]
-               (org.rosuda.REngine.REXP/createDataFrame
-                 (RList. colarr names)))))
+  (let [names (into-array String (map (comp name str) (column-names dataset)))
+        col-meta (or (:col-meta (meta dataset)) {})
+        cols (into [] (map #(let [col (column dataset %)]
+                              (with-meta col (col-meta (aget names %))))
+                           (range (alength names))))
+        colarr (into-array REXP (map to-r cols))]
+    (org.rosuda.REngine.REXP/createDataFrame
+     (RList. colarr names))))
 (defmethod to-r ::matrix
   [mat]
   (org.rosuda.REngine.REXP/createDoubleMatrix
