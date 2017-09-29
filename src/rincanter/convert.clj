@@ -14,11 +14,11 @@
 ;; May 5, 2015
 
 (ns rincanter.convert
-  (:require [incanter.core :refer [with-data col-names $ dataset categorical-var dataset? matrix matrix?]]
+  (:require [incanter.core :refer [with-data col-names $ dataset categorical-var dataset?]]
             [clojure.core.incubator :refer [seqable?]]
 
 
-            clojure.core.matrix
+            [clojure.core.matrix :refer[matrix matrix?]]
             clojure.core.matrix.impl.double-array
             )
   (:import (org.rosuda.REngine REXPNull REXP RList REXPList REXPGenericVector
@@ -290,7 +290,7 @@ otherwise"
 (defmethod to-r ::dataframe
   [dataset]
   (with-data dataset
-             (let [names (into-array String (map name (col-names dataset)))
+    (let [names (into-array String (map (comp name str) (col-names dataset)))
                    col-meta (or (:col-meta (meta dataset)) {})
                    cols (into [] (map #(let [col ($ %)]
                                          (with-meta col (col-meta (aget names %))))

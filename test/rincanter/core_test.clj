@@ -14,12 +14,15 @@
 ;; May 5, 2015
 
 (ns rincanter.core-test
-  (:import (org.rosuda.REngine REXPInteger REXPDouble REXPString REXPLogical)
-           (org.rosuda.REngine.Rserve RConnection))
-  (:use (clojure test))
-  (:use (incanter core stats))
-  (:use (rincanter convert))
-  (:use (rincanter core)))
+  (:require [clojure.core.matrix :refer [matrix matrix?]]
+            clojure.core.matrix.dataset
+            [clojure.test :refer :all]
+            [incanter.core :refer [$ dataset dim with-data]]
+            [incanter.stats :refer [mean within]]
+            [rincanter.convert :refer [from-r r-attr r-true to-r]]
+            [rincanter.core :refer :all])
+  (:import [org.rosuda.REngine REXPDouble REXPInteger REXPLogical REXPString]
+           org.rosuda.REngine.Rserve.RConnection))
 
 ;;taken from incanter information_theory_tests.clj
 (def ^:dynamic *R* nil)
@@ -101,7 +104,7 @@
 
 (deftest factors
   (let [iris (r-eval *R* "iris")]
-    (is (= (get (first (:rows iris)) "Sepal.Length")) 5.1)))
+    (is (=  (get (first (clojure.core.matrix.dataset/row-maps iris)) "Sepal.Length") 5.1))))
 
 (deftest pass-through-dataframe-equivalence
   (with-r-eval
@@ -129,13 +132,13 @@
   ) 
 
 (deftest set-matrix
-  (r-set! *R* "mat"  (matrix [1 2 3 4 5 6] 2))
+  (r-set! *R* "mat"  (clojure.core.matrix/matrix [[1 2 3] [4 5 6]]))
   (is (= ["matrix"] (r-eval *R* "class(mat)")))
-  (is (= [3 2] (r-eval *R* "dim(mat)")))
-  (is (= [1.0 3.0 5.0 2.0 4.0 6.0] (r-eval *R* "as.vector(mat)"))))
+  (is (= [2 3] (r-eval *R* "dim(mat)")))
+  (is (= [ 1.0 4.0 2.0 5.0 3.0 6.0] (r-eval *R* "as.vector(mat)"))))
 
 (deftest set-matrix-eigen
-  (r-set! *R* "mat"  (matrix [1 2 3 4] 2))
+  (r-set! *R* "mat"  (matrix [[1 2] [ 3 4]]))
   (r-void-eval *R* "eig=eigen(mat)")
   (is (= [5.372281323269014 -0.3722813232690143] (get (r-get *R* "eig") "values"))))
 

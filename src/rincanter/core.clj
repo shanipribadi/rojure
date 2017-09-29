@@ -25,7 +25,7 @@
   ([host port]
    (RConnection. host port))
   ([]
-    (RConnection. "localhost" 6311)))
+   (RConnection. "localhost" 6311)))
 
 (defn r-eval-no-catch
   "Eval expression in the R engine. Will not catch any exceptions that
@@ -40,12 +40,12 @@
   "Eval expression in the R engine. Just return the raw JRI/R wrapper,
   don't convert to Clojure object"
   [r expression]
-      (try
-      (.parseAndEval r expression)
-      (catch REngineException ex
-        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))
-      (catch REXPMismatchException ex
-        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))))
+  (try
+    (.parseAndEval r expression)
+    (catch REngineException ex
+      (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))
+    (catch REXPMismatchException ex
+      (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))))
 
 (defn r-eval
   "Eval expression in the R engine. Convert the return value from
@@ -59,18 +59,18 @@
   and throw"
   [r expression]
 
-    (try
-      (.assign r ".tmp." expression)
-      (let [rexp (.parseAndEval r "try(eval(parse(text=.tmp.)),silent=TRUE)")]
-        (if (.inherits rexp "try-error")
-          (throw (Exception.
-                   (format "Error in R evaluating expression:\n %s.\nR exception: %s"
-                           expression (.asString rexp))))
-          rexp))
-      (catch REngineException ex
-        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))
-      (catch REXPMismatchException ex
-        (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))))
+  (try
+    (.assign r ".tmp." expression)
+    (let [rexp (.parseAndEval r "try(eval(parse(text=.tmp.)),silent=TRUE)")]
+      (if (.inherits rexp "try-error")
+        (throw (Exception.
+                (format "Error in R evaluating expression:\n %s.\nR exception: %s"
+                        expression (.asString rexp))))
+        rexp))
+    (catch REngineException ex
+      (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))
+    (catch REXPMismatchException ex
+      (println (format "Caught exception evaluating expression: %s\n: %s" expression ex)))))
 
 (defn try-r-eval
   [r rexp]
@@ -79,7 +79,7 @@
 
 (defmacro with-r-eval-no-catch
   "Evaluate forms that are string using r-eval-no-catch, otherwise, just eval
-clojure code normally"
+  clojure code normally"
   [r & forms]
   `(do ~@(map #(if (string? %) (list 'r-eval-no-catch r %) %) forms)))
 
@@ -104,10 +104,10 @@ clojure code normally"
 (defn r-set-raw!
   "Assign r-name to value within the R engine"
   [r r-name value]
-    (try
-      (.assign r r-name value)
-      (catch REngineException ex
-        (println (format "Caught exception assigning R value: %s\n: %s" r-name ex)))))
+  (try
+    (.assign r r-name value)
+    (catch REngineException ex
+      (println (format "Caught exception assigning R value: %s\n: %s" r-name ex)))))
 
 (defn r-set! [r r-name value]
   (r-set-raw! r r-name (to-r value)))
@@ -135,7 +135,7 @@ clojure code normally"
 
 (defn r-install-CRAN
   "Tries to install the provided package uusing the optionally provided
-repository or the master CRAN repository"
+  repository or the master CRAN repository"
   ([r package]
    (dorun (map #'println
                (r-eval r (format "capture.output(install.packages(\"%s\", repos=\"http://cran.r-project.org\"))" package)))))
