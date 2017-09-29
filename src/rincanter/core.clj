@@ -176,3 +176,33 @@
 (defmethod print-method REXP [o w]
   (.write w (str "#=(org.rosuda.REngine.REXP. " (str o) ")")))
 
+
+(defrecord ClosableProcces
+   [p]
+  java.io.Closeable
+  (close [this]
+    (.destroy p)))
+
+
+(defn- start-and-wait[]
+  (let [p (rincanter.core.ClosableProcces. (:process (start-rserve)))]
+    (Thread/sleep 200)
+    p))
+
+
+(defn- do-r-transform-ds [r in-ds r-file]
+  (let [curr-dir  (System/getProperty "user.dir")] 
+    (r-set! r "in_df" in-ds)
+    (r-eval r (format "saveRDS(in_df,'%s/in_df.rds')" curr-dir))
+    (try-r-eval r (format "source('%s/%s')" curr-dir r-file))
+    (r-eval r (format "saveRDS(out_df,'%s/out_df.rds')",curr-dir))
+    (r-get r "out_df")))
+
+(defn r-transform-ds
+  ([r in-ds r-file]
+       (do-r-transform-ds r in-ds r-file))
+  ([in-ds r-file]
+   (with-open [p (start-and-wait)
+               r (get-r)]
+       (do-r-transform-ds r in-ds r-file))))
+

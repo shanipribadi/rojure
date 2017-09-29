@@ -15,9 +15,9 @@
 
 (ns rincanter.core-test
   (:require [clojure.core.matrix :refer [matrix matrix?]]
-            clojure.core.matrix.dataset
+            [clojure.core.matrix.dataset :refer [row-maps]]
             [clojure.test :refer :all]
-            [incanter.core :refer [$ dataset dim with-data]]
+            [incanter.core :refer [$ dataset dim with-data col-names]]
             [incanter.stats :refer [mean within]]
             [rincanter.convert :refer [from-r r-attr r-true to-r]]
             [rincanter.core :refer :all])
@@ -127,9 +127,7 @@
    "get matrix from R"
   (let [m (r-get *R* "matrix(c(1,2,3,4,5,6),nrow=2)")]
     (is (matrix? m))
-    (is (= [2 3] (dim m)))
-    )
-  ) 
+    (is (= [2 3] (dim m))))) 
 
 (deftest set-matrix
   (r-set! *R* "mat"  (clojure.core.matrix/matrix [[1 2 3] [4 5 6]]))
@@ -142,6 +140,23 @@
   (r-void-eval *R* "eig=eigen(mat)")
   (is (= [5.372281323269014 -0.3722813232690143] (get (r-get *R* "eig") "values"))))
 
+
+(deftest r-transorm-ds
+  (let [ds (rincanter.core/r-transform-ds
+            (dataset [[1 2 3][1 2 3]])
+            "test.R"
+            )]
+    (is (= 2.0 ($ 0 0 ds)))
+    (is (= ["n" (col-names ds)]))))
+
+(deftest r-transorm-ds-with-r
+  (let [ds (rincanter.core/r-transform-ds
+            *R*
+            (dataset [[1 2 3][1 2 3]])
+            "test.R"
+            )]
+    (is (= 2.0 ($ 0 0 ds)))
+    (is (= ["n" (col-names ds)]))))
 
 
 (use-fixtures :once r-connection-fixture)
