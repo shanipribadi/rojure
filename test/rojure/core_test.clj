@@ -13,13 +13,13 @@
 ;; Modified work by svarcheg https://github.com/svarcheg/rincanter
 ;; May 5, 2015
 
-(ns rincanter.core-test
+(ns rojure.core-test
   (:require [clojure.core.matrix :refer [matrix matrix? shape mget]]
             [clojure.core.matrix.stats :refer [mean]]
             [clojure.core.matrix.dataset :refer [row-maps column-names column dataset]]
             [clojure.test :refer :all]
-            [rincanter.convert :refer [from-r r-attr r-true to-r]]
-            [rincanter.core :refer :all])
+            [rojure.convert :refer [from-r r-attr r-true to-r]]
+            [rojure.core :refer :all])
   (:import [org.rosuda.REngine REXPDouble REXPInteger REXPLogical REXPString]
            org.rosuda.REngine.Rserve.RConnection))
 
@@ -154,7 +154,7 @@
 
 
 (deftest r-transorm-ds
-  (let [ds (rincanter.core/r-transform-ds
+  (let [ds (rojure.core/r-transform-ds
             (dataset [[1 2 3][1 2 3]])
             "test.R"
             )]
@@ -162,7 +162,7 @@
     (is (= ["n" (column-names ds)]))))
 
 (deftest r-transorm-ds-with-r
-  (let [ds (rincanter.core/r-transform-ds
+  (let [ds (rojure.core/r-transform-ds
             *R*
             (dataset [[1 2 3][1 2 3]])
             "test.R"

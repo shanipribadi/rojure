@@ -13,7 +13,7 @@
 ;; Modified work by svarcheg https://github.com/svarcheg/rincanter
 ;; May 5, 2015
 
-(ns rincanter.convert
+(ns rojure.convert
   (:require
             [clojure.core.incubator :refer [seqable?]]
             [clojure.core.matrix.dataset :refer[column-names column dataset dataset?]]

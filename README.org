@@ -1,14 +1,26 @@
-#+OPTIONS: author:nil timestamp:nil
+#+OPTIONS: author:nil timestamp:nil  ^:nil
 
-Welcome to Rincanter!
+Welcome to rojure
 
 * About
 
-  Main difference from original [[https://github.com/jolby/rincanter/][rincanter]] is that this version
+  Main difference from original [[https://github.com/jolby/rincanter/][rincanter]] is that this project
   does not require playing with native libraries as it uses a socket connection to the R interpreter.
+
+  Rincanter was offering translation between the incanter 1.5.6 data types (matrix,dataset).
+  These datatype have now been moved to clojure.core.matrix (and incanter > 1.9.0 uses them internally now)
+  and hence this project could be made independent from 
+  incanter, so I changed the name from rincanter to rojure.
+
+  Rojure can be used from the incanter irepl, GorillaRepl or the normal clojure repl.
+  It only has depedencies towards clojure.core.matrix. (apart from JRI for R interoperability)
+  
+
   As the original version, it also offers translation between
-  [[http://clojure.org/][Clojure]] and [[http://data-sorcery.org/][Incanter]] datatypes and R datatypes such as R dataframe to
-  [[http://data-sorcery.org/][Incanter]] dataset.
+  [[http://clojure.org/][Clojure]] and R data types such as R dataframe to
+  core.matrix.matrix dataset.
+
+
 
 * Installation
 
@@ -26,9 +38,9 @@ Welcome to Rincanter!
     Rserve()
     #+END_EXAMPLE
 
-** Add rincanter dependency to project.clj
+** Add rojure dependency to project.clj
 #+BEGIN_EXAMPLE clojure
-[svarcheg/rincanter "0.0.1-SNAPSHOT"]
+[rojure "0.1.0-SNAPSHOT"]
 #+END_EXAMPLE
 
 
@@ -39,29 +51,39 @@ Welcome to Rincanter!
   - [[http://svarcheg.github.io/rincanter/rincanter.core.html#var-r-set.21][r-set!]]
   - [[http://svarcheg.github.io/rincanter/rincanter.core.html#var-r-get][r-get]]
 
+  For the higher level use case of dataset->dataset transformation in R, 
+  I added a function 'r-transform-ds', which takes a clojure dataset and an R file as 
+  input, executes the R file and returns a new dataset
+
 ** r-eval
 You can play around with Clojure/Incanter and R in the same REPL session:
 #+BEGIN_EXAMPLE clojure
-   (use '(rincanter core))
+   (use '(rojure core))
 
-   (r-eval "data(iris)")
+  ;; define connection to R (needs running R with RServe started)
+   (def r (get-r))
+
+   (r-eval r "data(iris)")
 
    ;;eval's the iris dataframe object, converts into
    ;;incanter dataset
-   (r-eval "iris")
+   (r-eval r "iris")
  
    ;;create vector on R side
-   (r-eval "vec_in_r = c(1,2,3)")
+   (r-eval r "vec_in_r = c(1,2,3)")
    
    ;;now retrieve it, converting to Clojure vector
-   (r-get "vec_in_r")
+   (r-get r "vec_in_r")
 #+END_EXAMPLE
 
 plotting:
 #+BEGIN_EXAMPLE
-   (use '(rincanter core))
+   (use '(rojure core))
 
-   (r-eval "data(iris)")
+    ;; define connection to R (needs running R with RServe started)
+   (def r (get-r))
+
+   (r-eval r "data(iris)")
    
    ;;initialize the R graphics device for your system:
    ;;For Mac OS X
@@ -69,12 +91,16 @@ plotting:
    ;;windows: 
    (r-eval "windows()")
    ;;unix/linux
-   (r-eval "x11()")
+   (r-eval r "x11()")
 
    ;;create the plot using values from the iris dataset
-   (r-eval "plot(Sepal.Length ~ Sepal.Width, data = iris)")
+   (r-eval r "plot(Sepal.Length ~ Sepal.Width, data = iris)")
    ;;alter this existing plot
-   (r-eval "title(main = \"Iris Sepal Measurements\")")
+   (r-eval r "title(main = \"Iris Sepal Measurements\")")
+
+   ;; close graphic device
+    (r-eval r "dev.off()")
+
 #+END_EXAMPLE
  
 ** with-r-eval
@@ -84,7 +110,7 @@ are evaluated in R using r-eval:
 
 
 #+BEGIN_EXAMPLE clojure
-   (use '(rincanter core))
+   (use '(rojure core))
 
    (with-r-eval 
      "data(iris)"
@@ -99,6 +125,68 @@ are evaluated in R using r-eval:
      ;;now retrieve it, converting to Clojure vector
      (r-get "vec_in_r"))
 #+END_EXAMPLE
+
+** r-transform-ds
+
+This use-case has in mind to allow seamlessly editing of Clojure code side-by-side with R code.
+As the R code is in it's own .R file, it can be edited by whatever R IDE (Emacs, Rstudio)
+
+It assume that a lots of uses cases of integrating R into Clojure can be expressed as dataframe->dataframe 
+transformations in R. I believe it is general enough to do arbitrary computations in R,
+the result needs just to be transformed to a data.frame at the end.
+
+In the future version I might add a similar function for matrix->matrix transformations.
+
+
+The R script executed by 'r-transfrom-ds' just needs to follow this conventions:
+
+  * It need to be able to run standalone
+  * It assumes that a variable in_df is present in R session (and nothing else)
+  * It needs to set an variable out_df into the R session (probably at the end)
+  
+Working with the R script standalone, the user just needs to make sure that 'in_df' is present in his development 
+R session.
+
+To ease debugging, the r-transform-ds function writes both R variables ("in_df" and "out_df") to disk in rds format,
+so they can me read in the development R session easily with "readRDS('in_df.rds')" for inspection.
+This allows to keep a rather smooth flow between working in Clojure and working in R.
+
+
+
+#+BEGIN_EXAMPLE clojure
+   (use '(rojure core))
+   (use '(clojure.core.matrix dataset))
+
+   ;; define connection to R (needs running R with RServe started)
+   (def r (get-r))
+
+   ;; define the input ds to transform
+   (def ds (dataset [[1 2 3][4 5 6]]))
+ 
+   ;; sent input ds to R and execute R script 
+   ;; (R script receives ds in variable "in_df" and needs to produce a variable "out_df")
+   ;; both in_df and out_df are serialsed to disc, to ease debuging
+   (def out-ds (r-transform-ds r ds "./count.R"))
+
+   ;;out-ds is an core.matrix dataset
+   out-ds
+
+   ;;count.R looks like this:
+   library(tidyverse)
+
+   out_df <- in_df %>%
+     count
+
+    ;; in an separate R session the user could now test / develop the R code, by executing
+    in_df <- readRDS("in_df.rds")
+    source("./count.R")   ;; or step interactively over the lines of the R script
+    
+
+
+#+END_EXAMPLE
+
+
+
 
 
 * Documentation

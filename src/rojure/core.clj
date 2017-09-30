@@ -13,12 +13,12 @@
 ;; Modified work by svarcheg https://github.com/svarcheg/rincanter
 ;; May 5, 2015
 
-(ns rincanter.core
+(ns rojure.core
   (:import (org.rosuda.REngine REXP REngineException REXPMismatchException)
            (org.rosuda.REngine.Rserve RConnection))
-  (:require [rincanter.convert :refer [to-r from-r]]
+  (:require [rojure.convert :refer [to-r from-r]]
             [clojure.java.shell :refer [sh]]
-            [rincanter.proc :as proc]))
+            [rojure.proc :as proc]))
 
 
 (defn get-r
@@ -186,7 +186,7 @@
 
 
 (defn- start-and-wait[]
-  (let [p (rincanter.core.ClosableProcces. (:process (start-rserve)))]
+  (let [p (rojure.core.ClosableProcces. (:process (start-rserve)))]
     (Thread/sleep 200)
     p))
 

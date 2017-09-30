@@ -1,4 +1,4 @@
-(defproject skm-ice/rincanter
+(defproject rojure
   "0.1.0-SNAPSHOT"
   :description "Clojure/R integration using rosuda Rserve"
   :dependencies [[org.clojure/clojure "1.8.0"]

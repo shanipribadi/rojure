@@ -1,6 +1,6 @@
 ;; from https://gist.github.com/codification/1984857
 
-(ns rincanter.proc
+(ns rojure.proc
  (:import [java.lang ProcessBuilder])
  (:use [clojure.java.io :only [reader writer]]))
 
