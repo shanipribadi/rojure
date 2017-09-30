@@ -17,6 +17,7 @@
   (:require [clojure.core.matrix :refer [matrix matrix? shape mget]]
             [clojure.core.matrix.stats :refer [mean]]
             [clojure.core.matrix.dataset :refer [row-maps column-names column dataset]]
+            [clojure.java.io :as io]
             [clojure.test :refer :all]
             [rojure.convert :refer [from-r r-attr r-true to-r]]
             [rojure.core :refer :all])
@@ -156,7 +157,7 @@
 (deftest r-transform-ds
   (let [ds (r-transform
             (dataset [[1 2 3][1 2 3]])
-            "test.R"
+            (io/resource "test.R")
             )]
     (is (= 2 (mget ds 0 0)))
     (is (= ["n" (column-names ds)]))))
@@ -165,14 +166,14 @@
   (let [ds (r-transform
             *R*
             (dataset [[1 2 3][1 2 3]])
-            "test.R"
+            (io/resource "test.R")
             )]
     (is (= 2 (mget ds 0 0)))
     (is (= ["n" (column-names ds)]))))
 
 (deftest r-transform-matrix
   (let [m (clojure.core.matrix/matrix [[1 2][3 4]])
-        eig (r-transform *R* m "./test_matrix.R")]
+        eig (r-transform *R* m (io/resource "test_matrix.R"))]
     (is (= eig
            [[-0.4159735579192842 -0.8245648401323938]
             [-0.9093767091321241 0.5657674649689923]]

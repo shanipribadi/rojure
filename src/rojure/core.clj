@@ -194,10 +194,15 @@
 
 
 (defn- do-r-transform [r in-val r-file]
-  (let [curr-dir  (System/getProperty "user.dir")] 
+  (let [curr-dir  (System/getProperty "user.dir")
+        r-file (if (.isAbsolute (clojure.java.io/as-file r-file))
+                 (clojure.java.io/as-file r-file)
+                 (str curr-dir "/" r-file)
+                 )
+        ] 
     (r-set! r "in_" in-val)
     (r-eval r (format "saveRDS(in_,'%s/in_.rds')" curr-dir))
-    (try-r-eval r (format "source('%s/%s')" curr-dir r-file))
+    (try-r-eval r (format "source('%s')" r-file))
     (r-eval r (format "saveRDS(out_,'%s/out_.rds')",curr-dir))
     (r-get r "out_")))
 
