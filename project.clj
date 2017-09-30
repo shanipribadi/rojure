@@ -1,5 +1,5 @@
 (defproject rojure
-  "0.1.0"
+  "0.2.0-SNAPSHOT"
   :description "Clojure/R integration using rosuda Rserve"
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/tools.logging "0.4.0"]
@@ -10,11 +10,6 @@
                  [net.mikera/core.matrix "0.52.0" :exclusions [org.clojure/clojure]]
                  ]
 
-  :profiles {:deployer {:repositories [["snapshots" {:url "file:///var/go/mvn-repo/"
-                                                     :sign-releases false}]
-                                       ["releases" {:url "file:///var/go/mvn-repo/"
-                                                    :creds nil
-                                                    :sign-releases false}]]}}
   :plugins [[lein-kibit "0.1.2"]
             [lein-ancient "0.6.7"]
             [lein-bikeshed "0.2.0"]
