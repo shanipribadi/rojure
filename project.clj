@@ -1,5 +1,4 @@
-(defproject rojure
-  "0.2.0"
+(defproject rojure "0.2.1-SNAPSHOT"
   :description "Clojure/R integration using rosuda Rserve"
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/tools.logging "0.4.0"]

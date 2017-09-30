@@ -38,14 +38,14 @@
 (defn within
   "y is within z of x in metric space."
   [z x y]
-    (< (scalar-abs (- x y)) z))
+  (< (scalar-abs (- x y)) z))
 
 (defn r-connection-fixture [test-fn]
   (let [p (:process (start-rserve))]
     (Thread/sleep 1000)                                     ;; allow for server to boot!
-     (binding [*R* (get-r)]
-           (test-fn)
-           (.close ^RConnection *R*))
+    (binding [*R* (get-r)]
+          (test-fn)
+          (.close ^RConnection *R*))
     (.destroy p)))
 
 (deftest can-connect-to-R
@@ -132,7 +132,7 @@
   (let [data  (r-get *R* "iris")]
     (is (within 0.000001
                 (mean (column data "Sepal.Width"))
-                 ((r-eval *R* "mean(iris$Sepal.Width)") 0)))))
+                ((r-eval *R* "mean(iris$Sepal.Width)") 0)))))
 
 
 
@@ -157,8 +157,8 @@
 (deftest r-transform-ds
   (let [ds (r-transform
             (dataset [[1 2 3][1 2 3]])
-            (io/resource "test.R")
-            )]
+            (io/resource "test.R"))]
+            
     (is (= 2 (mget ds 0 0)))
     (is (= ["n" (column-names ds)]))))
 
@@ -166,8 +166,8 @@
   (let [ds (r-transform
             *R*
             (dataset [[1 2 3][1 2 3]])
-            (io/resource "test.R")
-            )]
+            (io/resource "test.R"))]
+            
     (is (= 2 (mget ds 0 0)))
     (is (= ["n" (column-names ds)]))))
 
@@ -176,9 +176,9 @@
         eig (r-transform *R* m (io/resource "test_matrix.R"))]
     (is (= eig
            [[-0.4159735579192842 -0.8245648401323938]
-            [-0.9093767091321241 0.5657674649689923]]
+            [-0.9093767091321241 0.5657674649689923]]))))
 
-           ))))
+
 
 
 (use-fixtures :once r-connection-fixture)
