@@ -40,7 +40,7 @@ Welcome to rojure
 
 ** Add rojure dependency to project.clj
 #+BEGIN_EXAMPLE clojure
-[rojure "0.1.0-SNAPSHOT"]
+[rojure "0.2.0"]
 #+END_EXAMPLE
 
 
