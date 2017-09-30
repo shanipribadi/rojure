@@ -18,7 +18,7 @@ Welcome to rojure
 
   As the original version, it also offers translation between
   [[http://clojure.org/][Clojure]] and R data types such as R dataframe to
-  core.matrix.matrix dataset.
+  core.matrix.matrix.dataset.
 
 
 
@@ -56,7 +56,7 @@ Welcome to rojure
   input, executes the R file and returns a new dataset
 
 ** r-eval
-You can play around with Clojure/Incanter and R in the same REPL session:
+You can play around with Clojure and R in the same REPL session:
 #+BEGIN_EXAMPLE clojure
    (use '(rojure core))
 
@@ -131,8 +131,8 @@ are evaluated in R using r-eval:
 This use-case has in mind to allow seamlessly editing of Clojure code side-by-side with R code.
 As the R code is in it's own .R file, it can be edited by whatever R IDE (Emacs, Rstudio)
 
-It assume that a lots of uses cases of integrating R into Clojure can be expressed as dataframe->dataframe 
-transformations in R. I believe it is general enough to do arbitrary computations in R,
+I assume that a lots of uses cases of integrating R into Clojure can be expressed as dataframe->dataframe 
+transformations executed in R. I believe this is general enough to do arbitrary computations in R,
 the result needs just to be transformed to a data.frame at the end.
 
 In the future version I might add a similar function for matrix->matrix transformations.
@@ -144,12 +144,12 @@ The R script executed by 'r-transfrom-ds' just needs to follow this conventions:
   * It assumes that a variable in_df is present in R session (and nothing else)
   * It needs to set an variable out_df into the R session (probably at the end)
   
-Working with the R script standalone, the user just needs to make sure that 'in_df' is present in his development 
-R session.
+When working with the R script standalone, the user just needs to make sure that 'in_df' is present in
+ his development R session.
 
 To ease debugging, the r-transform-ds function writes both R variables ("in_df" and "out_df") to disk in rds format,
-so they can me read in the development R session easily with "readRDS('in_df.rds')" for inspection.
-This allows to keep a rather smooth flow between working in Clojure and working in R.
+so they can be read in the development R session easily with "readRDS('in_df.rds')" for inspection.
+This allows to keep a rather smooth work flow for working in Clojure and R together.
 
 
 
@@ -165,7 +165,7 @@ This allows to keep a rather smooth flow between working in Clojure and working 
  
    ;; sent input ds to R and execute R script 
    ;; (R script receives ds in variable "in_df" and needs to produce a variable "out_df")
-   ;; both in_df and out_df are serialsed to disc, to ease debuging
+   ;; both in_df and out_df are serialised to disc, to ease debuging
    (def out-ds (r-transform-ds r ds "./count.R"))
 
    ;;out-ds is an core.matrix dataset
