@@ -178,6 +178,8 @@
   (.write w (str "#=(org.rosuda.REngine.REXP. " (str o) ")")))
 
 
+
+
 (defrecord ClosableProcces
    [p]
   java.io.Closeable
@@ -191,19 +193,22 @@
     p))
 
 
-(defn- do-r-transform-ds [r in-ds r-file]
+(defn- do-r-transform [r in-val r-file]
   (let [curr-dir  (System/getProperty "user.dir")] 
-    (r-set! r "in_df" in-ds)
-    (r-eval r (format "saveRDS(in_df,'%s/in_df.rds')" curr-dir))
+    (r-set! r "in_" in-val)
+    (r-eval r (format "saveRDS(in_,'%s/in_.rds')" curr-dir))
     (try-r-eval r (format "source('%s/%s')" curr-dir r-file))
-    (r-eval r (format "saveRDS(out_df,'%s/out_df.rds')",curr-dir))
-    (r-get r "out_df")))
+    (r-eval r (format "saveRDS(out_,'%s/out_.rds')",curr-dir))
+    (r-get r "out_")))
 
-(defn r-transform-ds
-  ([r in-ds r-file]
-       (do-r-transform-ds r in-ds r-file))
-  ([in-ds r-file]
+(defn r-transform
+ "Executes a given R scipt file in the R engine.
+   It sets the given value  as variable in_ in R process
+   and returns variable out_ at the end."
+  ([r in-val r-file]
+       (do-r-transform r in-val r-file))
+  ([in-val r-file]
    (with-open [p (start-and-wait)
                r (get-r)]
-       (do-r-transform-ds r in-ds r-file))))
+       (do-r-transform r in-val r-file))))
 

@@ -1,5 +1,5 @@
 library(tidyverse)
 
 
-out_df <- in_df %>%
+out_ <- in_ %>%
     count

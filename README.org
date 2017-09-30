@@ -141,14 +141,14 @@ In the future version I might add a similar function for matrix->matrix transfor
 The R script executed by 'r-transfrom-ds' just needs to follow this conventions:
 
   * It need to be able to run standalone
-  * It assumes that a variable in_df is present in R session (and nothing else)
-  * It needs to set an variable out_df into the R session (probably at the end)
+  * It assumes that a variable in_ is present in R session (and nothing else)
+  * It needs to set an variable out_ into the R session (probably at the end)
   
-When working with the R script standalone, the user just needs to make sure that 'in_df' is present in
+When working with the R script standalone, the user just needs to make sure that 'in_' is present in
  his development R session.
 
-To ease debugging, the r-transform-ds function writes both R variables ("in_df" and "out_df") to disk in rds format,
-so they can be read in the development R session easily with "readRDS('in_df.rds')" for inspection.
+To ease debugging, the r-transform-ds function writes both R variables ("in_" and "out_") to disk in rds format,
+so they can be read in the development R session easily with "readRDS('in_.rds')" for inspection.
 This allows to keep a rather smooth work flow for working in Clojure and R together.
 
 
@@ -164,8 +164,8 @@ This allows to keep a rather smooth work flow for working in Clojure and R toget
    (def ds (dataset [[1 2 3][4 5 6]]))
  
    ;; sent input ds to R and execute R script 
-   ;; (R script receives ds in variable "in_df" and needs to produce a variable "out_df")
-   ;; both in_df and out_df are serialised to disc, to ease debuging
+   ;; (R script receives ds in variable "in_" and needs to produce a variable "out_")
+   ;; both in_ and out_ are serialised to disc, to ease debuging
    (def out-ds (r-transform-ds r ds "./count.R"))
 
    ;;out-ds is an core.matrix dataset
@@ -174,20 +174,35 @@ This allows to keep a rather smooth work flow for working in Clojure and R toget
    ;;count.R looks like this:
    library(tidyverse)
 
-   out_df <- in_df %>%
+   out_ <- in_ %>%
      count
 
     ;; in an separate R session the user could now test / develop the R code, by executing
-    in_df <- readRDS("in_df.rds")
+    in_ <- readRDS("in_.rds")
     source("./count.R")   ;; or step interactively over the lines of the R script
-    
-
-
+ 
 #+END_EXAMPLE
 
+For matrices it work in the same way:
 
+#+BEGIN_EXAMPLE clojure
+   (use '(rojure core))
+   (use '(clojure.core.matrix dataset))
 
+   ;; define connection to R (needs running R with RServe started)
+   (def r (get-r))
 
+   ;;define matrix to transform 
+   (def m (clojure.core.matrix/matrix [[1 2] [3 4]]))
+
+   ;; transform matrix with R
+   (def eig (r-transform-ds r m "./eigen.R"))
+   eig 
+   
+   ;;eigen.R looks like this:
+   out_ <- eigen(in_)$vectors
+
+#+END_EXAMPLE
 
 * Documentation
 ** API Documentation

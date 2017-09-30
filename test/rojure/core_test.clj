@@ -153,22 +153,31 @@
   (is (= [5.372281323269014 -0.3722813232690143] (get (r-get *R* "eig") "values"))))
 
 
-(deftest r-transorm-ds
-  (let [ds (rojure.core/r-transform-ds
+(deftest r-transform-ds
+  (let [ds (r-transform
             (dataset [[1 2 3][1 2 3]])
             "test.R"
             )]
     (is (= 2 (mget ds 0 0)))
     (is (= ["n" (column-names ds)]))))
 
-(deftest r-transorm-ds-with-r
-  (let [ds (rojure.core/r-transform-ds
+(deftest r-transform-ds-with-r
+  (let [ds (r-transform
             *R*
             (dataset [[1 2 3][1 2 3]])
             "test.R"
             )]
     (is (= 2 (mget ds 0 0)))
     (is (= ["n" (column-names ds)]))))
+
+(deftest r-transform-matrix
+  (let [m (clojure.core.matrix/matrix [[1 2][3 4]])
+        eig (r-transform *R* m "./test_matrix.R")]
+    (is (= eig
+           [[-0.4159735579192842 -0.8245648401323938]
+            [-0.9093767091321241 0.5657674649689923]]
+
+           ))))
 
 
 (use-fixtures :once r-connection-fixture)
