@@ -82,25 +82,25 @@
   "Evaluate forms that are string using r-eval-no-catch, otherwise, just eval
   clojure code normally"
   [r & forms]
-  `(do ~@(map #(if (string? %) (list 'r-eval-no-catch r %) %) forms)))
+  `(do ~@(map #(if (string? %) `(r-eval-no-catch ~r ~%) %) forms)))
 
 (defmacro with-r-eval-raw
   "Evaluate forms that are string using r-eval-raw, otherwise, just eval
   Clojure code normally"
   [r & forms]
-  `(do ~@(map #(if (string? %) (list 'r-eval r %) %) forms)))
+  `(do ~@(map #(if (string? %) `(r-eval-raw ~r ~%) %) forms)))
 
 (defmacro with-r-eval
   "Evaluate forms that are string using r-eval, otherwise, just eval
   Clojure code normally"
   [r & forms]
-  `(do ~@(map #(if (string? %) (list 'r-eval r %) %) forms)))
+  `(do ~@(map #(if (string? %) `(r-eval ~r ~%) %) forms)))
 
 (defmacro with-r-try-parse-eval
   "Evaluate forms that are string using r-try-parse-eval, otherwise
   just eval Clojure code normally"
   [r & forms]
-  `(do ~@(map #(if (string? %) (list 'r-try-parse-eval r %) %) forms)))
+  `(do ~@(map #(if (string? %) `(r-try-parse-eval ~r ~%) %) forms)))
 
 (defn r-set-raw!
   "Assign r-name to value within the R engine"
